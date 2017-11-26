@@ -1,0 +1,6 @@
+.DS_Store
+*.exe
+*.a
+*.o
+/dgl_test.gdt
+/dgl_test.gpr
