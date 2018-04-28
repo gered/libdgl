@@ -364,54 +364,51 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     mov edi, ebx             ; dest pixels
     mov esi, ecx             ; source pixels
-    mov ebp, eax             ; WARNING: no named local access after this!
 
-    ; ebp = number of 8-pixel runs
+    ; eax = number of 8-pixel runs
     ; edx = line loop counter
-    ; ebx = pixel data
-    ; eax = pixel data
 
     test edx, edx            ; make sure there is >0 lines to be drawn
     jz @@done
 
 @@draw_line:
-    mov ecx, ebp             ; ecx = counter of 8-pixel runs left to draw
+    mov ecx, eax             ; ecx = counter of 8-pixel runs left to draw
 @@draw_px_0:
     mov bx, [esi+0]          ; load src pixel
-    mov ax, [esi+2]
     test bl, bl
     jz @@draw_px_1           ; if it is color 0, skip it
     mov [edi+0], bl          ; otherwise, draw it onto dest
 @@draw_px_1:
-    test al, al
-    jz @@draw_px_2
-    mov [edi+2], al
-@@draw_px_2:
     test bh, bh
-    jz @@draw_px_3
+    jz @@draw_px_2
     mov [edi+1], bh
+@@draw_px_2:
+    mov bx, [esi+2]
+    test bl, bl
+    jz @@draw_px_3
+    mov [edi+2], bl
 @@draw_px_3:
-    test ah, ah
+    test bh, bh
     jz @@draw_px_4
-    mov [edi+3], ah
+    mov [edi+3], bh
 @@draw_px_4:
     mov bx, [esi+4]
-    mov ax, [esi+6]
     test bl, bl
     jz @@draw_px_5
     mov [edi+4], bl
 @@draw_px_5:
-    test al, al
-    jz @@draw_px_6
-    mov [edi+6], al
-@@draw_px_6:
     test bh, bh
-    jz @@draw_px_7
+    jz @@draw_px_6
     mov [edi+5], bh
+@@draw_px_6:
+    mov bx, [esi+6]
+    test bl, bl
+    jz @@draw_px_7
+    mov [edi+6], bl
 @@draw_px_7:
-    test ah, ah
+    test bh, bh
     jz @@end_8_run
-    mov [edi+7], ah
+    mov [edi+7], bh
 @@end_8_run:
     add esi, 8               ; move src and dest up 8 pixels
     add edi, 8
@@ -419,8 +416,8 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
     jnz @@draw_px_0          ; if there are still more runs, draw them
 
 @@end_line:
-    add esi, [esp+20]        ; move src and dest to start of next line
-    add edi, [esp+16]
+    add esi, [@@src_y_inc]   ; move src and dest to start of next line
+    add edi, [@@dest_y_inc]
     dec edx                  ; decrease line loop counter
     jnz @@draw_line          ; keep going if there's more lines to draw
 
