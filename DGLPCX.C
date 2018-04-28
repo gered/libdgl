@@ -1,8 +1,10 @@
-#include "pcx.h"
-#include "gfx.h"
-#include "draw.h"
-#include "error.h"
+#include "dglpcx.h"
+#include "dglgfx.h"
+#include "dglpal.h"
+#include "dgldraw.h"
+#include "dglerror.h"
 #include <stdio.h>
+#include <string.h>
 
 typedef struct {
     byte manufacturer;
@@ -28,7 +30,7 @@ typedef struct {
 SURFACE* pcx_load(const char *filename, byte *pcx_palette) {
     FILE *fp;
     PCX_HEADER header;
-    int i, n, count;
+    int i, n, count, x, y;
     SURFACE *pcx;
     ubyte data;
 
@@ -56,27 +58,32 @@ SURFACE* pcx_load(const char *filename, byte *pcx_palette) {
 
     pcx = surface_create(header.width + 1, header.height + 1);
 
-    // read pixel data
-    i = 0;
-    while (i < (header.width * header.height)) {
-        n = fread(&data, 1, 1, fp);
-        if (n == -1)
-            goto pcx_load_error;
+	i = 0;
+    for (y = 0; y < (header.height + 1); ++y) {
+		// write pixels out per-scanline (technically this is what the pcx
+		// standard specifies, though a lot of pcx loaders don't do this).
+	    x = 0;
+		while (x < header.bytes_per_line) {
+            // read pixel (or RLE count...)
+            data = fgetc(fp);
+			if ((data & 0xc0) == 0xc0) {
+			   // was an RLE count, pixel is next byte
+			   count = data & 0x3f;
+			   data = fgetc(fp);
+			} else {
+			  count = 1;
+			}
 
-        if (data >= 192) {
-            count = data - 192;
-            n = fread(&data, 1, 1, fp);
-            if (n == -1)
-                goto pcx_load_error;
-
-            while (count > 0) {
-                pcx->pixels[i++] = data;
-                count--;
-            }
-        } else {
-            pcx->pixels[i++] = data;
-        }
-    }
+			// store this pixel colour the specified number of times
+			while (count--) {
+                if (x < pcx->width) {
+				   pcx->pixels[i] = data;
+				}
+				++i;
+				++x;
+			}
+		}
+	}
 
     // read palette (only if needed)
     if (pcx_palette) {
@@ -100,7 +107,7 @@ pcx_load_error:
     return NULL;
 }
 
-static inline boolean write_pcx_data(FILE *fp, int run_count, byte pixel) {
+static boolean write_pcx_data(FILE *fp, int run_count, byte pixel) {
     int n;
 
     if ((run_count > 1) || ((pixel & 0xc0) == 0xc0)) {
@@ -198,7 +205,7 @@ boolean pcx_save(const char *filename, const SURFACE *src, const byte *palette) 
         }
     } else {
         for (i = 0; i < 256; ++i) {
-            video_get_color(i, &r, &g, &b);
+            pal_get_color(i, &r, &g, &b);
 
             n = fputc(r << 2, fp);
             if (n == -1)

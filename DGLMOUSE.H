@@ -1,7 +1,7 @@
-#ifndef DGL_MOUSE_H_INCLUDED
-#define DGL_MOUSE_H_INCLUDED
+#ifndef DGL_DGLMOUSE_H_INCLUDED
+#define DGL_DGLMOUSE_H_INCLUDED
 
-#include "common.h"
+#include "dglcmn.h"
 
 #define MOUSE_LEFTBUTTON   0x01
 #define MOUSE_RIGHTBUTTON  0x02
@@ -10,27 +10,27 @@
 /*
  * Current mouse cursor X position.
  */
-volatile extern int mouse_x;
+extern volatile int mouse_x;
 
 /*
  * Current mouse cursor Y position.
  */
-volatile extern int mouse_y;
+extern volatile int mouse_y;
 
 /*
  * Current state of mouse buttons.
  */
-volatile extern int mouse_buttons;
+extern volatile int mouse_buttons;
 
 /*
  * Amount the cursor moved along the X-axis since the last update.
  */
-volatile extern int mouse_delta_x;
+extern volatile int mouse_delta_x;
 
 /*
  * Amount the cursor moved along the Y-axis since the last update.
  */
-volatile extern int mouse_delta_y;
+extern volatile int mouse_delta_y;
 
 /*
  * Installs a custom mouse handler.
@@ -80,11 +80,11 @@ void mouse_set_bounds(int min_x, int min_y, int max_x, int max_y);
  * @param button The button to check the status of.
  * @return TRUE if the button is pressed.
  */
-static inline boolean mouse_button(int button);
+static boolean mouse_button(int button);
 
 // --------------------------------------------------------------------------
 
-static inline boolean mouse_button(int button) {
+static boolean mouse_button(int button) {
     return (mouse_buttons & button) != 0;
 }
 

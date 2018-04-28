@@ -1,15 +1,15 @@
-#ifndef DGL_KEYBOARD_H_INCLUDED
-#define DGL_KEYBOARD_H_INCLUDED
+#ifndef DGL_DGLKYBRD_H_INCLUDED
+#define DGL_DGLKYBRD_H_INCLUDED
 
-#include "common.h"
-#include "keys.h"
+#include "dglcmn.h"
+#include "dglkeys.h"
 
 typedef byte KEY;
 
 /*
  * Current state of the keyboard.
  */
-volatile extern ubyte keys[128];
+extern volatile ubyte keys[128];
 
 /*
  * Installs a custom keyboard interrupt handler.

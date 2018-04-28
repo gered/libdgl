@@ -1,27 +1,36 @@
-#include "draw.h"
-#include "gfx.h"
-#include "mathext.h"
-#include "util.h"
-#include "internal.h"
+#include "dgldraw.h"
+#include "dglgfx.h"
+#include "dglmath.h"
+#include "dglutil.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 
 static char printf_buffer[1024];
 
 void surface_hline_f(SURFACE *surface, int x1, int x2, int y, int color) {
     byte *p = surface_pointer(surface, x1, y);
-    memset(p, color, x2 - x1 + 1);
+    mem_fill(p, color, (x2 - x1 + 1));
 }
 
 void surface_vline_f(SURFACE *surface, int x, int y1, int y2, int color) {
     byte *p = surface_pointer(surface, x, y1);
     int line_inc = surface->width;
-    int y;
+    int lines_left = y2 - y1 + 1;
 
-    for (y = y1; y <= y2; ++y, p += line_inc) {
-        *p = (byte)color;
-    }
+    extern void draw_line(byte *dest, int color, int line_inc, int lines_left);
+    #pragma aux draw_line =          \
+        "    test ecx, ecx"          \
+        "    jz done"                \
+        "draw:"                      \
+        "    mov [edx], al"          \
+        "    add edx, ebx"           \
+        "    dec ecx"                \
+        "    jnz draw"               \
+        "done:"                      \
+        parm [edx] [eax] [ebx] [ecx];
+    draw_line(p, color, line_inc, lines_left);
 }
 
 void surface_line(SURFACE *surface, int x1, int y1, int x2, int y2, int color) {
@@ -152,77 +161,95 @@ void surface_line_f(SURFACE *surface, int x1, int y1, int x2, int y2, int color)
     }
 }
 
+extern void draw_both_vert_lines(byte *left, byte *right, int color, int y_inc, int height);
+#pragma aux draw_both_vert_lines =      \
+    "   inc ecx"                        \
+    "draw:"                             \
+    "   mov [edi], al"                  \
+    "   mov [esi], al"                  \
+    "   add edi, edx"                   \
+    "   add esi, edx"                   \
+    "   dec ecx"                        \
+    "   jnz draw"                       \
+    "done:"                             \
+    parm [edi] [esi] [eax] [edx] [ecx];
+
+extern void draw_vert_line(byte *dest, int color, int y_inc, int height);
+#pragma aux draw_vert_line =      \
+    "   inc ecx"                  \
+    "draw:"                       \
+    "   mov [edi], al"            \
+    "   add edi, edx"             \
+    "   dec ecx"                  \
+    "   jnz draw"                 \
+    "done:"                       \
+    parm [edi] [eax] [edx] [ecx];
+
 void surface_rect(SURFACE *surface, int x1, int y1, int x2, int y2, int color) {
-    byte *p1, *p2;
-    int width;
-    int y;
-    int y_inc = surface->width;
-    int clipped_x1 = x1;
-    int clipped_y1 = y1;
-    int clipped_x2 = x2;
-    int clipped_y2 = y2;
-    int clip_right = rect_right(&surface->clip_region);
-    int clip_bottom = rect_bottom(&surface->clip_region);
+    RECT clipped;
+    int clipped_x2, clipped_y2;
 
-    if (x1 < surface->clip_region.x)
-        clipped_x1 = surface->clip_region.x;
-    if (x2 > clip_right)
-        clipped_x2 = clip_right;
+    if (x2 < x1)
+        SWAP(int, x1, x2);
+    if (y2 < y1)
+        SWAP(int, y1, y2);
 
-    width = clipped_x2 - clipped_x1 + 1;
+    clipped.x = x1;
+    clipped.y = y1;
+    clipped.width = x2 - x1 + 1;
+    clipped.height = y2 - y1 + 1;
+
+    if (!clip_to_region(&surface->clip_region, &clipped))
+        return;
+
+    clipped_x2 = clipped.x + clipped.width - 1;
+    clipped_y2 = clipped.y + clipped.height - 1;
+    color = fill32(color);
 
     // top line, only if y1 was within bounds
-    if (y1 < surface->clip_region.y)
-        clipped_y1 = surface->clip_region.y;
-    else
-        memset(surface_pointer(surface, clipped_x1, clipped_y1), color, width);
+    if (y1 == clipped.y) {
+        byte *p = surface_pointer(surface, clipped.x, clipped.y);
+        mem_fill32(p, color, clipped.width);
+    }
 
     // bottom line, only if y2 was within bounds
-    if (y2 > clip_bottom)
-        clipped_y2 = clip_bottom;
-    else
-        memset(surface_pointer(surface, clipped_x1, clipped_y2), color, width);
+    if (y2 == clipped_y2) {
+        byte *p = surface_pointer(surface, clipped.x, clipped_y2);
+        mem_fill32(p, color, clipped.width);
+    }
 
     // draw both left and right lines if neither x1 nor x2 were clipped
-    if (x1 == clipped_x1 && x2 == clipped_x2) {
-        p1 = surface_pointer(surface, x1, y1);
-        p2 = surface_pointer(surface, x2, y1);
-        for (y = y1; y <= y2; ++y, p1 += y_inc, p2 += y_inc) {
-            *p1 = (byte)color;
-            *p2 = (byte)color;
-        }
+    if (x1 == clipped.x && x2 == clipped_x2) {
+        byte *p1 = surface_pointer(surface, clipped.x, clipped.y);
+        byte *p2 = surface_pointer(surface, clipped_x2, clipped.y);
+        draw_both_vert_lines(p1, p2, color, surface->width, clipped.height - 1);
 
     // draw left line if x1 was not clipped
-    } else if (x1 == clipped_x1) {
-        p1 = surface_pointer(surface, x1, y1);
-        for (y = y1; y <= y2; ++y, p1 += y_inc)
-            *p1 = (byte)color;
+    } else if (x1 == clipped.x) {
+        byte *p = surface_pointer(surface, clipped.x, clipped.y);
+        draw_vert_line(p, color, surface->width, clipped.height - 1);
 
     // draw right line if x2 was not clipped
     } else if (x2 == clipped_x2) {
-        p1 = surface_pointer(surface, x2, y1);
-        for (y = y1; y <= y2; ++y, p1 += y_inc)
-            *p1 = (byte)color;
+        byte *p = surface_pointer(surface, clipped_x2, clipped.y);
+        draw_vert_line(p, color, surface->width, clipped.height - 1);
     }
 }
 
 void surface_rect_f(SURFACE *surface, int x1, int y1, int x2, int y2, int color) {
-    byte *p1, *p2;
+    byte *p;
+    byte *p1;
+    byte *p2;
     int width = x2 - x1 + 1;
-    int y;
+    int lines_left = y2 - y1;
     int y_inc = surface->width;
 
-    p1 = surface_pointer(surface, x1, y1);
-    p2 = surface_pointer(surface, x1, y2);
-    memset(p1, color, width);
-    memset(p2, color, width);
+    p = surface_pointer(surface, x1, y1);
 
-    p1 = surface_pointer(surface, x1, y1);
-    p2 = surface_pointer(surface, x2, y1);
-    for (y = y1; y <= y2; ++y, p1 += y_inc, p2 += y_inc) {
-        *p1 = (byte)color;
-        *p2 = (byte)color;
-    }
+    p1 = p;
+    p2 = p + width - 1;
+
+    direct_rect_f(color, width, y_inc, lines_left, p1, p2);
 }
 
 void surface_filled_rect(SURFACE *surface,
@@ -233,6 +260,11 @@ void surface_filled_rect(SURFACE *surface,
                          int color) {
     if (!clamp_to_region(&surface->clip_region, &x1, &y1, &x2, &y2))
         return;
+
+    if (x2 < x1)
+        SWAP(int, x1, x2);
+    if (y2 < y1)
+        SWAP(int, y1, y2);
 
     surface_filled_rect_f(surface, x1, y1, x2, y2, color);
 }
@@ -245,14 +277,12 @@ void surface_filled_rect_f(SURFACE *surface,
                            int color) {
     byte *p;
     int width = x2 - x1 + 1;
-    int y;
     int y_inc = surface->width;
+    int lines_left = y2 - y1 + 1;
 
     p = surface_pointer(surface, x1, y1);
-    for (y = y1; y <= y2; ++y) {
-        memset(p, (byte)color, width);
-        p += y_inc;
-    }
+
+    direct_filled_rect_f(color, y_inc, width, lines_left, p);
 }
 
 #define CHAR_WIDTH  8
@@ -262,12 +292,12 @@ void surface_filled_rect_f(SURFACE *surface,
 
 // dest_x, dest_y - original unclipped render x,y coords
 // dest_clipped - clipped destination render region
-static inline void print_char(SURFACE *surface,
-                              int dest_x,
-                              int dest_y,
-                              const RECT *dest_clipped,
-                              int color,
-                              char c) {
+static void print_char(SURFACE *surface,
+                       int dest_x,
+                       int dest_y,
+                       const RECT *dest_clipped,
+                       int color,
+                       char c) {
     byte *p;
     byte *rom_char;
     char char_line_bits;
@@ -277,7 +307,7 @@ static inline void print_char(SURFACE *surface,
     int y_inc = surface->width;
 
     p = surface_pointer(surface, dest_clipped->x, dest_clipped->y);
-    rom_char = map_dos_memory(0xffa6e) + (c * CHAR_HEIGHT);
+    rom_char = ((byte*)0xffa6e) + (c * CHAR_HEIGHT);
 
     // get offset x,y to start rendering char from (will be in range 0-7)
     offset_x = dest_clipped->x - dest_x;
@@ -298,12 +328,12 @@ static inline void print_char(SURFACE *surface,
     }
 }
 
-static inline void print_text(SURFACE *surface,
-                              int x,
-                              int y,
-                              int color,
-                              boolean clip,
-                              const char *text) {
+static void print_text(SURFACE *surface,
+                       int x,
+                       int y,
+                       int color,
+                       boolean clip,
+                       const char *text) {
     const char *c;
     RECT r;
     RECT draw_r;
@@ -311,12 +341,17 @@ static inline void print_text(SURFACE *surface,
     r = rect(x, y, CHAR_WIDTH, CHAR_HEIGHT);
 
     for (c = text; *c; ++c) {
-        if (*c == '\n') {
+        switch (*c) {
+        case '\n':
             r.x = x;
             r.y += r.height;
-        } else if (*c == ' ') {
+            break;
+        case ' ':
             r.x += r.width;
-        } else {
+            break;
+        case '\r':
+            break;
+        default:
             if (clip) {
                 draw_r = r;
                 if (clip_to_region(&surface->clip_region, &draw_r))

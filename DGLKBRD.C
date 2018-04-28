@@ -1,11 +1,8 @@
-#include "keyboard.h"
-#include "internal.h"
-#include "util.h"
-#include "error.h"
+#include "dglkbrd.h"
+#include "dglutil.h"
+#include "dglerror.h"
 #include <string.h>
-#include <dpmi.h>
-#include <pc.h>
-#include <sys/nearptr.h>
+#include <dos.h>
 
 #define PIC_CTRL_PORT          0x20
 #define KEYBRD_DATA_PORT       0x60
@@ -33,44 +30,43 @@ volatile KEY _key_scan;
 
 uword _old_flags;
 
-_go32_dpmi_seginfo _old_handler;
-_go32_dpmi_seginfo _new_handler;
+void (interrupt far *_old_handler)();
 
-static inline void reset_key_states() {
+static void reset_key_states() {
     memset((void*)keys, 0, 128);
 }
 
 // waits until the keyboard status port indicates the data port
 // can be read from once again
-static inline void wait_kb_data_read() {
-    while ((inportb(KEYBRD_STATUS_PORT) & BIT_0) == 0) {
+static void wait_kb_data_read() {
+    while ((inp(KEYBRD_STATUS_PORT) & BIT_0) == 0) {
     }
 }
 
 // waits until the keyboard status port indicates the data port
 // can be written to once again
-static inline void wait_kb_data_write() {
-    while ((inportb(KEYBRD_STATUS_PORT) & BIT_1) != 0) {
+static void wait_kb_data_write() {
+    while ((inp(KEYBRD_STATUS_PORT) & BIT_1) != 0) {
     }
 }
 
 // sends data to the keyboard data port. checks for success
 // and returns TRUE if the data write succeeded
-static inline boolean send_kb_data(ubyte data) {
+static boolean send_kb_data(ubyte data) {
     ubyte result;
 
     wait_kb_data_write();
-    outportb(KEYBRD_DATA_PORT, data);
+    outp(KEYBRD_DATA_PORT, data);
 
     wait_kb_data_read();
-    result = inportb(KEYBRD_DATA_PORT);
+    result = inp(KEYBRD_DATA_PORT);
     return (result == 0xFA);
 }
 
 // keyboard interrupt handler
-void kb_int_handler(void) {
+void interrupt far kb_int_handler(void) {
     // read scan code of key that was just pressed
-    _key_scan = inportb(KEYBRD_DATA_PORT);
+    _key_scan = inp(KEYBRD_DATA_PORT);
     if (_key_scan & 0x80) {
         // high bit set indicates key was released, clear high bit to get
         // the actual key scan code
@@ -83,19 +79,18 @@ void kb_int_handler(void) {
     _key_last_scan = _key_scan;
 
     // indicate key event was processed to keyboard controller
-    _key_scan = inportb(KEYBRD_CTRL_PORT) | 0x82;
-    outportb(KEYBRD_CTRL_PORT, _key_scan);
-    outportb(KEYBRD_CTRL_PORT, _key_scan & 0x7f);
-    outportb(PIC_CTRL_PORT, 0x20);
+    _key_scan = inp(KEYBRD_CTRL_PORT) | 0x82;
+    outp(KEYBRD_CTRL_PORT, _key_scan);
+    outp(KEYBRD_CTRL_PORT, _key_scan & 0x7f);
+    outp(PIC_CTRL_PORT, 0x20);
 }
-END_OF_FUNCTION(kb_int_handler)
 
 static uword get_kb_flags(void) {
-    return *((uword*)(map_dos_memory(KEYBRD_FLAGS_ADDR)));
+    return *((uword*)KEYBRD_FLAGS_ADDR);
 }
 
 static void set_kb_flags(uword flags) {
-    *((uword*)(map_dos_memory(KEYBRD_FLAGS_ADDR))) = flags;
+    *((uword*)KEYBRD_FLAGS_ADDR) = flags;
 }
 
 // updates the keyboard indicator LEDs from the num/caps/scroll lock flags
@@ -129,25 +124,18 @@ boolean keyboard_init(void) {
         return FALSE;
     }
 
-    LOCK_MEMORY(keys, 128);
-    LOCK_VARIABLE(_key_scan);
-    LOCK_VARIABLE(_key_last_scan);
-    LOCK_FUNCTION(kb_int_handler);
-
     // preserve old flags
     _old_flags = get_kb_flags();
 
     reset_key_states();
-    if (!_install_irq(9, kb_int_handler, &_new_handler, &_old_handler)) {
-        dgl_set_error(DGL_KEYBOARD_IRQ_INSTALL_FAILURE);
-        return FALSE;
-    }
+    _old_handler = _dos_getvect(9);
+    _dos_setvect(9, kb_int_handler);
 
     // turn off keyboard LEDs since our interrupt handler does not currently
     // respect the num/caps/scroll lock statuses
-    _disable_interrupts();
+    int_disable();
     update_kb_led(0);
-    _enable_interrupts();
+    int_enable();
 
     _installed = TRUE;
     return TRUE;
@@ -158,14 +146,11 @@ boolean keyboard_shutdown(void) {
         return TRUE;  // don't care
 
     // reset keyboard LEDs to previous state
-    _disable_interrupts();
+    int_disable();
     update_kb_led(_old_flags);
-    _enable_interrupts();
+    int_enable();
 
-    if (!_restore_irq(9, &_new_handler, &_old_handler)) {
-        dgl_set_error(DGL_KEYBOARD_IRQ_RESTORE_FAILURE);
-        return FALSE;
-    }
+    _dos_setvect(9, _old_handler);
     reset_key_states();
 
     // restore keyboard flags to previous state

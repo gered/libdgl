@@ -1,5 +1,5 @@
-#ifndef DGL_COMMON_H_INCLUDED
-#define DGL_COMMON_H_INCLUDED
+#ifndef DGL_DGLCMN_H_INCLUDED
+#define DGL_DGLCMN_H_INCLUDED
 
 typedef int             boolean;
 
@@ -27,7 +27,7 @@ typedef unsigned int    uint;
 #define BIT_6               0x40
 #define BIT_7               0x80
 
-#define BIT_ISSET(bit, x)   ((x) & (bit) != 0)
+#define BIT_ISSET(bit, x)   ((x) & (bit))
 #define BIT_SET(bit, x)     ((x) |= (bit))
 #define BIT_CLEAR(bit, x)   ((x) &= ~(bit))
 #define BIT_TOGGLE(bit, x)  ((x) ^= (bit))

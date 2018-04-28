@@ -1,7 +1,7 @@
-#ifndef DGL_ERROR_H_INCLUDED
-#define DGL_ERROR_H_INCLUDED
+#ifndef DGL_DGLERROR_H_INCLUDED
+#define DGL_DGLERROR_H_INCLUDED
 
-#include "common.h"
+#include "dglcmn.h"
 
 typedef enum {
     DGL_NONE = 0,

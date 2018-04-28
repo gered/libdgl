@@ -1,9 +1,9 @@
-#ifndef DGL_MATRIX33_H_INCLUDED
-#define DGL_MATRIX33_H_INCLUDED
+#ifndef DGL_DGLMAT33_H_INCLUDED
+#define DGL_DGLMAT33_H_INCLUDED
 
-#include "common.h"
-#include "mathext.h"
-#include "vector2.h"
+#include "dglcmn.h"
+#include "dglmath.h"
+#include "dglvec2.h"
 #include <math.h>
 
 #define _M33_11 0
@@ -20,33 +20,33 @@ typedef struct {
     float m[9];
 } MATRIX33;
 
-static inline MATRIX33 matrix33(float m11, float m12, float m13,
-                                float m21, float m22, float m23,
-                                float m31, float m32, float m33);
-static inline void matrix33_set(MATRIX33 *m,
-                                float m11, float m12, float m13,
-                                float m21, float m22, float m23,
-                                float m31, float m32, float m33);
+static MATRIX33 matrix33(float m11, float m12, float m13,
+                         float m21, float m22, float m23,
+                         float m31, float m32, float m33);
+static void matrix33_set(MATRIX33 *m,
+                         float m11, float m12, float m13,
+                         float m21, float m22, float m23,
+                         float m31, float m32, float m33);
 
-static inline MATRIX33 matrix33_from_euler_angles(float x, float y, float z);
-static inline MATRIX33 matrix33_rotation_x(float radians);
-static inline MATRIX33 matrix33_rotation_y(float radians);
-static inline MATRIX33 matrix33_rotation_z(float radians);
+static MATRIX33 matrix33_from_euler_angles(float x, float y, float z);
+static MATRIX33 matrix33_rotation_x(float radians);
+static MATRIX33 matrix33_rotation_y(float radians);
+static MATRIX33 matrix33_rotation_z(float radians);
 
-static inline MATRIX33 matrix33_add(MATRIX33 a, MATRIX33 b);
-static inline MATRIX33 matrix33_sub(MATRIX33 a, MATRIX33 b);
-static inline MATRIX33 matrix33_mul(MATRIX33 a, MATRIX33 b);
-static inline MATRIX33 matrix33_scale(MATRIX33 m, float scale);
+static MATRIX33 matrix33_add(MATRIX33 a, MATRIX33 b);
+static MATRIX33 matrix33_sub(MATRIX33 a, MATRIX33 b);
+static MATRIX33 matrix33_mul(MATRIX33 a, MATRIX33 b);
+static MATRIX33 matrix33_scale(MATRIX33 m, float scale);
 
-static inline float matrix33_determinant(MATRIX33 m);
-static inline MATRIX33 matrix33_inverse(MATRIX33 m);
-static inline MATRIX33 matrix33_transpose(MATRIX33 m);
-static inline VECTOR2F matrix33_transform(MATRIX33 m, VECTOR2F v);
+static float matrix33_determinant(MATRIX33 m);
+static MATRIX33 matrix33_inverse(MATRIX33 m);
+static MATRIX33 matrix33_transpose(MATRIX33 m);
+static VECTOR2F matrix33_transform(MATRIX33 m, VECTOR2F v);
 
-static inline MATRIX33 matrix33_translation_2d(float x, float y);
-static inline MATRIX33 matrix33_scaling_2d(float x, float y);
-static inline MATRIX33 matrix33_rotation_2d(float radians);
-static inline VECTOR2F matrix33_transform_2d(MATRIX33 m, VECTOR2F v);
+static MATRIX33 matrix33_translation_2d(float x, float y);
+static MATRIX33 matrix33_scaling_2d(float x, float y);
+static MATRIX33 matrix33_rotation_2d(float radians);
+static VECTOR2F matrix33_transform_2d(MATRIX33 m, VECTOR2F v);
 
 #define IDENTITY_MATRIX33 matrix33(1.0f, 0.0f, 0.0f, \
                                    0.0f, 1.0f, 0.0f, \
@@ -54,9 +54,9 @@ static inline VECTOR2F matrix33_transform_2d(MATRIX33 m, VECTOR2F v);
 
 // --------------------------------------------------------------------------
 
-static inline MATRIX33 matrix33(float m11, float m12, float m13,
-                                float m21, float m22, float m23,
-                                float m31, float m32, float m33) {
+static MATRIX33 matrix33(float m11, float m12, float m13,
+                         float m21, float m22, float m23,
+                         float m31, float m32, float m33) {
     MATRIX33 result;
     result.m[_M33_11] = m11;
     result.m[_M33_12] = m12;
@@ -70,10 +70,10 @@ static inline MATRIX33 matrix33(float m11, float m12, float m13,
     return result;
 }
 
-static inline void matrix33_set(MATRIX33 *m,
-                                float m11, float m12, float m13,
-                                float m21, float m22, float m23,
-                                float m31, float m32, float m33) {
+static void matrix33_set(MATRIX33 *m,
+                         float m11, float m12, float m13,
+                         float m21, float m22, float m23,
+                         float m31, float m32, float m33) {
     m->m[_M33_11] = m11;
     m->m[_M33_12] = m12;
     m->m[_M33_13] = m13;
@@ -85,7 +85,7 @@ static inline void matrix33_set(MATRIX33 *m,
     m->m[_M33_33] = m33;
 }
 
-static inline MATRIX33 matrix33_from_euler_angles(float x, float y, float z) {
+static MATRIX33 matrix33_from_euler_angles(float x, float y, float z) {
     MATRIX33 rx, ry, rz;
     rx = matrix33_rotation_x(x);
     ry = matrix33_rotation_y(y);
@@ -93,7 +93,7 @@ static inline MATRIX33 matrix33_from_euler_angles(float x, float y, float z) {
     return matrix33_mul(matrix33_mul(rz, ry), rx);
 }
 
-static inline MATRIX33 matrix33_rotation_x(float radians) {
+static MATRIX33 matrix33_rotation_x(float radians) {
     MATRIX33 result;
     float s, c;
 
@@ -115,7 +115,7 @@ static inline MATRIX33 matrix33_rotation_x(float radians) {
     return result;
 }
 
-static inline MATRIX33 matrix33_rotation_y(float radians) {
+static MATRIX33 matrix33_rotation_y(float radians) {
     MATRIX33 result;
     float s, c;
 
@@ -137,7 +137,7 @@ static inline MATRIX33 matrix33_rotation_y(float radians) {
     return result;
 }
 
-static inline MATRIX33 matrix33_rotation_z(float radians) {
+static MATRIX33 matrix33_rotation_z(float radians) {
     MATRIX33 result;
     float s, c;
 
@@ -159,7 +159,7 @@ static inline MATRIX33 matrix33_rotation_z(float radians) {
     return result;
 }
 
-static inline MATRIX33 matrix33_add(MATRIX33 a, MATRIX33 b) {
+static MATRIX33 matrix33_add(MATRIX33 a, MATRIX33 b) {
     MATRIX33 result;
 
     result.m[_M33_11] = a.m[_M33_11] + b.m[_M33_11];
@@ -175,7 +175,7 @@ static inline MATRIX33 matrix33_add(MATRIX33 a, MATRIX33 b) {
     return result;
 }
 
-static inline MATRIX33 matrix33_sub(MATRIX33 a, MATRIX33 b) {
+static MATRIX33 matrix33_sub(MATRIX33 a, MATRIX33 b) {
     MATRIX33 result;
 
     result.m[_M33_11] = a.m[_M33_11] - b.m[_M33_11];
@@ -191,7 +191,7 @@ static inline MATRIX33 matrix33_sub(MATRIX33 a, MATRIX33 b) {
     return result;
 }
 
-static inline MATRIX33 matrix33_mul(MATRIX33 a, MATRIX33 b) {
+static MATRIX33 matrix33_mul(MATRIX33 a, MATRIX33 b) {
     MATRIX33 result;
 
     result.m[_M33_11] = a.m[_M33_11] * b.m[_M33_11] + a.m[_M33_12] * b.m[_M33_21] + a.m[_M33_13] * b.m[_M33_31];
@@ -209,7 +209,7 @@ static inline MATRIX33 matrix33_mul(MATRIX33 a, MATRIX33 b) {
     return result;
 }
 
-static inline MATRIX33 matrix33_scale(MATRIX33 m, float scale) {
+static MATRIX33 matrix33_scale(MATRIX33 m, float scale) {
     MATRIX33 result;
 
     result.m[_M33_11] = m.m[_M33_11] * scale;
@@ -225,7 +225,7 @@ static inline MATRIX33 matrix33_scale(MATRIX33 m, float scale) {
     return result;
 }
 
-static inline float matrix33_determinant(MATRIX33 m) {
+static float matrix33_determinant(MATRIX33 m) {
     return
         m.m[_M33_11] * m.m[_M33_22] * m.m[_M33_33] +
         m.m[_M33_12] * m.m[_M33_23] * m.m[_M33_31] +
@@ -235,7 +235,7 @@ static inline float matrix33_determinant(MATRIX33 m) {
         m.m[_M33_13] * m.m[_M33_22] * m.m[_M33_31];
 }
 
-static inline MATRIX33 matrix33_inverse(MATRIX33 m) {
+static MATRIX33 matrix33_inverse(MATRIX33 m) {
     float d;
     MATRIX33 result;
     d = matrix33_determinant(m);
@@ -258,7 +258,7 @@ static inline MATRIX33 matrix33_inverse(MATRIX33 m) {
     }
 }
 
-static inline MATRIX33 matrix33_transpose(MATRIX33 m) {
+static MATRIX33 matrix33_transpose(MATRIX33 m) {
     MATRIX33 result;
 
     result.m[_M33_11] = m.m[_M33_11];
@@ -276,7 +276,7 @@ static inline MATRIX33 matrix33_transpose(MATRIX33 m) {
     return result;
 }
 
-static inline VECTOR2F matrix33_transform(MATRIX33 m, VECTOR2F v) {
+static VECTOR2F matrix33_transform(MATRIX33 m, VECTOR2F v) {
     VECTOR2F result;
 
     result.x = v.x * m.m[_M33_11] + v.y * m.m[_M33_12] + m.m[_M33_13];
@@ -285,7 +285,7 @@ static inline VECTOR2F matrix33_transform(MATRIX33 m, VECTOR2F v) {
     return result;
 }
 
-static inline MATRIX33 matrix33_translation_2d(float x, float y) {
+static MATRIX33 matrix33_translation_2d(float x, float y) {
     MATRIX33 result;
 
     result.m[_M33_11] = 1.0f;
@@ -303,7 +303,7 @@ static inline MATRIX33 matrix33_translation_2d(float x, float y) {
     return result;
 }
 
-static inline MATRIX33 matrix33_scaling_2d(float x, float y) {
+static MATRIX33 matrix33_scaling_2d(float x, float y) {
     MATRIX33 result;
 
     result.m[_M33_11] = x;
@@ -321,11 +321,11 @@ static inline MATRIX33 matrix33_scaling_2d(float x, float y) {
     return result;
 }
 
-static inline MATRIX33 matrix33_rotation_2d(float radians) {
+static MATRIX33 matrix33_rotation_2d(float radians) {
     return matrix33_rotation_z(radians);
 }
 
-static inline VECTOR2F matrix33_transform_2d(MATRIX33 m, VECTOR2F v) {
+static VECTOR2F matrix33_transform_2d(MATRIX33 m, VECTOR2F v) {
     VECTOR2F result;
 
     result.x = v.x * m.m[_M33_11] + v.y * m.m[_M33_12] + m.m[_M33_13];

@@ -1,15 +1,15 @@
-#include "clipping.h"
-#include "common.h"
-#include "mathext.h"
+#include "dglclip.h"
+#include "dglcmn.h"
+#include "dglmath.h"
 
-static inline boolean is_in_bounds(int clip_x,
-                                   int clip_y,
-                                   int clip_right,
-                                   int clip_bottom,
-                                   int x1,
-                                   int y1,
-                                   int x2,
-                                   int y2) {
+static boolean is_in_bounds(int clip_x,
+                            int clip_y,
+                            int clip_right,
+                            int clip_bottom,
+                            int x1,
+                            int y1,
+                            int x2,
+                            int y2) {
 	if (y1 < clip_y && y2 < clip_y)
         return FALSE;
     if (y1 > clip_bottom && y2 > clip_bottom)

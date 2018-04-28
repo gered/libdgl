@@ -1,0 +1,80 @@
+target_config = release
+
+target_name = dgl
+
+object_files = &
+	dglblit.obj &
+    dglblita.obj &
+	dglclip.obj &
+	dgl.obj &
+	dgldraw.obj &
+    dgldrawa.obj &
+	dglgfx.obj &
+	dglpal.obj &
+	dglkbrd.obj &
+	dglmath.obj &
+	dglfixp.obj &
+	dglmouse.obj &
+	dglpcx.obj &
+	dglutil.obj
+
+test_object_files = test.obj
+
+cc_flags_debug = /d2 /zp4 /5r /fp3 /j
+cc_flags_release = /d1+ /zp4 /5r /fp3 /onatx /oe=40 /j
+cc_flags = /mf $(cc_flags_$(target_config))
+
+link_flags_debug = debug all
+link_flags_release = debug all
+link_flags = $(link_flags_$(target_config))
+
+asm_flags_debug = /zi
+asm_flags_release = /zi
+asm_flags = /m /ml $(asm_flags_$(target_config))
+
+.c.obj: .AUTODEPEND
+	wcc386 $[. /zq $(cc_flags)
+
+.asm.obj: .AUTODEPEND
+    tasm $[. /t $(asm_flags)
+
+$(target_name).lnk: $(object_files) $(test_object_files)
+	%create $^@
+	%append $^@ NAME $(target_name).exe
+	%append $^@ SYSTEM DOS4G
+	%append $^@ OPTION QUIET
+	@for %i in ($(object_files)) do %append $^@ FILE %i
+	@for %i in ($(test_object_files)) do %append $^@ FILE %i
+
+$(target_name).exe: $(object_files) $(test_object_files) $(target_name).lnk
+	wlink $(link_flags) @$(target_name).lnk
+
+$(target_name).lbc: $(object_files)
+	%create $^@
+	@for %i in ($(object_files)) do %append $^@ +%i
+
+$(target_name).lib: $(object_files) $(target_name).lbc
+	wlib /n /q /b $(target_name).lib @$(target_name).lbc
+
+clean : .SYMBOLIC
+	del *.obj
+	del *.err
+	del $(target_name).exe
+	del $(target_name).lnk
+	del $(target_name).lbc
+
+.NOCHECK
+build : $(target_name).lib
+#build : $(target_name).exe
+
+.NOCHECK
+library : $(target_name).lib
+
+.NOCHECK
+run : $(target_name).exe
+	$(target_name).exe
+
+.NOCHECK
+debug : $(target_name).exe
+	wd /swap /trap=rsi $(target_name).exe
+

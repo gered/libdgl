@@ -1,5 +1,5 @@
-#ifndef DGL_KEYS_H_INCLUDED
-#define DGL_KEYS_H_INCLUDED
+#ifndef DGL_DGLKEYS_H_INCLUDED
+#define DGL_DGLKEYS_H_INCLUDED
 
 #define KEY_ESC          0x01
 #define KEY_1            0x02

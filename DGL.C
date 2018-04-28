@@ -1,68 +1,22 @@
 #include "dgl.h"
-#include "keyboard.h"
-#include "mouse.h"
-#include "gfx.h"
-#include "util.h"
+#include "dglkbrd.h"
+#include "dglmouse.h"
+#include "dglgfx.h"
+#include "dglutil.h"
 #include <stdlib.h>
-#include <go32.h>
-#include <sys/nearptr.h>
 
-static boolean _initialized = FALSE;
 static DGL_ERROR _last_error = DGL_NONE;
 
-boolean dgl_init(void) {
-    if (_initialized) {
-        dgl_set_error(DGL_ALREADY_INIT);
-        return FALSE;
-    }
-    if (__djgpp_nearptr_enable() == 0) {
-        dgl_set_error(DGL_NEARPTR_ENABLE_FAILURE);
-        return FALSE;
-    }
-
-    srandom((int)sys_clock());
-
-    // first call will return zero, so call here just to "init"
-    sys_clock();
-    sys_ticks();
-
-    if (!video_init())
-        return FALSE;
-    if (!keyboard_init())
-        return FALSE;
-    if (!mouse_init())
-        return FALSE;
-
-    _initialized = TRUE;
-    return TRUE;
-}
-
-boolean dgl_shutdown(void) {
-    if (!_initialized)
-        return TRUE;   // don't care
-
-    // remove installed services
-    if (!mouse_shutdown())
-        return FALSE;
-    if (!keyboard_shutdown())
-        return FALSE;
-    if (!video_shutdown())
-        return FALSE;
-
-    __djgpp_nearptr_disable();
-
-    _initialized = FALSE;
-    return TRUE;
-}
-
 DGL_ERROR dgl_last_error(void) {
-    return _last_error;
+    DGL_ERROR err = _last_error;
+    _last_error = DGL_NONE;
+    return err;
 }
 
 const char* dgl_last_error_message(void) {
     switch (_last_error) {
         case DGL_NONE:
-            return "No error.";
+            return "";
         case DGL_ALREADY_INIT:
             return "DGL is already initialized.";
         case DGL_NEARPTR_ENABLE_FAILURE:
@@ -102,5 +56,11 @@ const char* dgl_last_error_message(void) {
 
 void dgl_set_error(DGL_ERROR error) {
     _last_error = error;
+}
+
+void dgl_init(void) {
+    atexit(mouse_shutdown);
+    atexit(keyboard_shutdown);
+    atexit(video_shutdown);
 }
 

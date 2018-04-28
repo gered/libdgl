@@ -1,12 +1,13 @@
-#ifndef DGL_MATH_H_INCLUDED
-#define DGL_MATH_H_INCLUDED
+#ifndef DGL_DGLMATH_H_INCLUDED
+#define DGL_DGLMATH_H_INCLUDED
 
-#include "common.h"
-#include "vector2.h"
+#include "dglcmn.h"
+#include "dglvec2.h"
 #include <math.h>
 
 #define TOLERANCE                  0.00001f
 
+#define PI                         3.1415927f
 #define PI_OVER_180                (PI / 180.0f)
 
 #define RADIANS_0                  0.0f
@@ -33,41 +34,41 @@ float angle_between_f(float x1, float y1, float x2, float y2);
 int next_power_of_2(int n);
 void point_on_circle(float radius, float radians, float *x, float *y);
 
-static inline VECTOR2F direction_from_angle(float radians);
-static inline float round(float value);
-static inline float symmetrical_round(float value);
-static inline boolean close_enough(float a, float b, float tolerance);
-static inline boolean power_of_2(int n);
-static inline float smooth_step(float low, float high, float t);
+static VECTOR2F direction_from_angle(float radians);
+static float round(float value);
+static float symmetrical_round(float value);
+static boolean close_enough(float a, float b, float tolerance);
+static boolean power_of_2(int n);
+static float smooth_step(float low, float high, float t);
 
 // --------------------------------------------------------------------------
 
-static inline VECTOR2F direction_from_angle(float radians) {
+static VECTOR2F direction_from_angle(float radians) {
     VECTOR2F direction;
     point_on_circle(1.0f, radians, &direction.x, &direction.y);
     return direction;
 }
 
-static inline float round(float value) {
+static float round(float value) {
     return ceil(value + 0.5f);
 }
 
-static inline float symmetrical_round(float value) {
+static float symmetrical_round(float value) {
     if (value > 0.0f)
         return floor(value + 0.5f);
     else
         return ceil(value - 0.5f);
 }
 
-static inline boolean close_enough(float a, float b, float tolerance) {
+static boolean close_enough(float a, float b, float tolerance) {
     return fabs((a - b) / ((b == 0.0f) ? 1.0f : b)) < tolerance;
 }
 
-static inline boolean power_of_2(int n) {
+static boolean power_of_2(int n) {
     return (n != 0) && !(n & (n - 1));
 }
 
-static inline float smooth_step(float low, float high, float t) {
+static float smooth_step(float low, float high, float t) {
     float n = CLAMP(t, 0.0f, 1.0f);
     return LERP(low, high, (n * n) * (3.0f - (2.0f * n)));
 }

@@ -1,8 +1,8 @@
-#ifndef DGL_CLIPPING_H_INCLUDED
-#define DGL_CLIPPING_H_INCLUDED
+#ifndef DGL_DGLCLIP_H_INCLUDED
+#define DGL_DGLCLIP_H_INCLUDED
 
-#include "common.h"
-#include "rect.h"
+#include "dglcmn.h"
+#include "dglrect.h"
 
 /*
  * Determines if the given point lies within the clipping region.

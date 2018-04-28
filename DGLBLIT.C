@@ -1,11 +1,10 @@
-#include "blit.h"
-#include "clipping.h"
-#include "internal.h"
+#include "dglblit.h"
+#include "dglclip.h"
 
-static inline boolean clip_blit(const RECT *dest_clip_region,
-                                RECT *src_blit_region,
-                                int *dest_x,
-                                int *dest_y) {
+static boolean clip_blit(const RECT *dest_clip_region,
+                         RECT *src_blit_region,
+                         int *dest_x,
+                         int *dest_y) {
     int dest_clip_right = rect_right(dest_clip_region);
     int dest_clip_bottom = rect_bottom(dest_clip_region);
     int offset;
@@ -13,7 +12,7 @@ static inline boolean clip_blit(const RECT *dest_clip_region,
     // off the left edge?
     if (*dest_x < dest_clip_region->x) {
         // completely off the left edge?
-        if ((*dest_x + src_blit_region->width) < dest_clip_region->x)
+        if ((*dest_x + src_blit_region->width - 1) < dest_clip_region->x)
             return FALSE;
 
         offset = src_blit_region->x - *dest_x;
@@ -35,7 +34,7 @@ static inline boolean clip_blit(const RECT *dest_clip_region,
     // off the top edge?
     if (*dest_y < dest_clip_region->y) {
         // completely off the top edge?
-        if ((*dest_y + src_blit_region->height) < dest_clip_region->y)
+        if ((*dest_y + src_blit_region->height - 1) < dest_clip_region->y)
             return FALSE;
 
         offset = dest_clip_region->y - *dest_y;
@@ -85,34 +84,31 @@ void surface_blit_region_f(const SURFACE *src,
                            int src_height,
                            int dest_x,
                            int dest_y) {
-    byte *psrc, *pdest;
-    int src_y_inc, dest_y_inc;
-    int width;
-    int lines_left;
-    int num_dwords;
+    const byte *psrc;
+    byte *pdest;
+    int lines;
+    int src_y_inc = src->width - src_width;
+    int dest_y_inc = dest->width - src_width;
+    int width_4, width_remainder;
 
-    psrc = surface_pointer(src, src_x, src_y);
-    src_y_inc = src->width;
-    pdest = surface_pointer(dest, dest_x, dest_y);
-    dest_y_inc = dest->width;
-    width = src_width;
-    lines_left = src_height;
+    psrc = (const byte*)surface_pointer(src, src_x, src_y);
+    pdest = (byte*)surface_pointer(dest, dest_x, dest_y);
+    lines = src_height;
 
-    if (width % 4 == 0) {
-        num_dwords = width / 4;
-        while (lines_left) {
-            REP_MOVSL(psrc, pdest, num_dwords);
-            psrc += src_y_inc;
-            pdest += dest_y_inc;
-            --lines_left;
-        }
+    width_4 = src_width / 4;
+    width_remainder = src_width & 3;
+
+    if (width_4 && !width_remainder) {
+        // width is a multiple of 4 (no remainder)
+        direct_blit_4(width_4, lines, pdest, psrc, dest_y_inc, src_y_inc);
+
+    } else if (width_4 && width_remainder) {
+        // width is >= 4 and there is a remainder ( <= 3 )
+        direct_blit_4r(width_4, lines, width_remainder, pdest, psrc, dest_y_inc, src_y_inc);
+
     } else {
-        while (lines_left) {
-            REP_MOVSB(psrc, pdest, width);
-            psrc += src_y_inc;
-            pdest += dest_y_inc;
-            --lines_left;
-        }
+        // width is <= 3
+        direct_blit_r(width_remainder, lines, pdest, psrc, dest_y_inc, src_y_inc);
     }
 }
 
@@ -144,61 +140,49 @@ void surface_blit_sprite_region_f(const SURFACE *src,
                                   int src_height,
                                   int dest_x,
                                   int dest_y) {
-    byte *psrc, *pdest;
+    const byte *psrc;
+    byte *pdest;
     byte pixel;
     int src_y_inc, dest_y_inc;
-    int width;
+    int width, width_4, width_8, width_remainder;
     int lines_left;
     int x;
 
-    psrc = surface_pointer(src, src_x, src_y);
+    psrc = (const byte*)surface_pointer(src, src_x, src_y);
     src_y_inc = src->width;
-    pdest = surface_pointer(dest, dest_x, dest_y);
+    pdest = (byte*)surface_pointer(dest, dest_x, dest_y);
     dest_y_inc = dest->width;
     width = src_width;
     lines_left = src_height;
 
-    // based on benchmarking on a DX2-66, there is VERY significant
-    // diminishing returns for loop unrolling beyond these sizes
-    // (in fact, even the one for 8 is a very small gain over 4)
-    if (width % 8 == 0) {
-        while (lines_left) {
-            for (x = 0; x < width; x += 8) {
-                if ((pixel = psrc[x + 0])) pdest[x + 0] = pixel;
-                if ((pixel = psrc[x + 1])) pdest[x + 1] = pixel;
-                if ((pixel = psrc[x + 2])) pdest[x + 2] = pixel;
-                if ((pixel = psrc[x + 3])) pdest[x + 3] = pixel;
-                if ((pixel = psrc[x + 4])) pdest[x + 4] = pixel;
-                if ((pixel = psrc[x + 5])) pdest[x + 5] = pixel;
-                if ((pixel = psrc[x + 6])) pdest[x + 6] = pixel;
-                if ((pixel = psrc[x + 7])) pdest[x + 7] = pixel;
-            }
-            psrc += src_y_inc;
-            pdest += dest_y_inc;
-            --lines_left;
+    src_y_inc -= width;
+    dest_y_inc -= width;
+
+    width_4 = width / 4;
+    width_remainder = width & 3;
+
+    if (width_4 && !width_remainder) {
+        if ((width_4 & 1) == 0) {
+            // width is actually an even multiple of 8!
+            direct_blit_sprite_8(width_4 / 2, lines_left, pdest, psrc, dest_y_inc, src_y_inc);
+        } else {
+            // width is a multiple of 4 (no remainder)
+            direct_blit_sprite_4(width_4, lines_left, pdest, psrc, dest_y_inc, src_y_inc);
         }
-    } else if (width % 4 == 0) {
-        while (lines_left) {
-            for (x = 0; x < width; x += 4) {
-                if ((pixel = psrc[x + 0])) pdest[x + 0] = pixel;
-                if ((pixel = psrc[x + 1])) pdest[x + 1] = pixel;
-                if ((pixel = psrc[x + 2])) pdest[x + 2] = pixel;
-                if ((pixel = psrc[x + 3])) pdest[x + 3] = pixel;
-            }
-            psrc += src_y_inc;
-            pdest += dest_y_inc;
-            --lines_left;
+
+    } else if (width_4 && width_remainder) {
+        if ((width_4 & 1) == 0) {
+            // width is _mostly_ made up of an even multiple of 8,
+            // plus a small remainder
+            direct_blit_sprite_8r(width_4 / 2, lines_left, pdest, psrc, width_remainder, dest_y_inc, src_y_inc);
+        } else {
+            // width is >= 4 and there is a remainder
+            direct_blit_sprite_4r(width_4, lines_left, pdest, psrc, width_remainder, dest_y_inc, src_y_inc);
         }
+
     } else {
-        while (lines_left) {
-            for (x = 0; x < width; ++x) {
-                if ((pixel = psrc[x]))
-                    pdest[x] = pixel;
-            }
-            psrc += src_y_inc;
-            pdest += dest_y_inc;
-            --lines_left;
-        }
+        // width is <= 3
+        direct_blit_sprite_r(width_remainder, lines_left, pdest, psrc, dest_y_inc, src_y_inc);
     }
 }
 
