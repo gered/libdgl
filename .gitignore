@@ -2,5 +2,9 @@
 *.exe
 *.a
 *.o
+*.obj
+*.lib
+*.lbc
+*.zip
 /dgl_test.gdt
 /dgl_test.gpr
