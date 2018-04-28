@@ -1,4 +1,4 @@
-target_config = release
+target_config = debug
 
 target_name = dgl
 
