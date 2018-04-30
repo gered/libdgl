@@ -18,8 +18,6 @@ object_files = &
 	dglpcx.obj &
 	dglutil.obj
 
-test_object_files = test.obj
-
 cc_flags_debug = /d2 /zp4 /5r /fp3 /j
 cc_flags_release = /d1+ /zp4 /5r /fp3 /onatx /oe=40 /j
 cc_flags = /mf $(cc_flags_$(target_config))
@@ -38,17 +36,6 @@ asm_flags = /m /ml $(asm_flags_$(target_config))
 .asm.obj: .AUTODEPEND
     tasm $[. /t $(asm_flags)
 
-$(target_name).lnk: $(object_files) $(test_object_files)
-	%create $^@
-	%append $^@ NAME $(target_name).exe
-	%append $^@ SYSTEM DOS4G
-	%append $^@ OPTION QUIET
-	@for %i in ($(object_files)) do %append $^@ FILE %i
-	@for %i in ($(test_object_files)) do %append $^@ FILE %i
-
-$(target_name).exe: $(object_files) $(test_object_files) $(target_name).lnk
-	wlink $(link_flags) @$(target_name).lnk
-
 $(target_name).lbc: $(object_files)
 	%create $^@
 	@for %i in ($(object_files)) do %append $^@ +%i
@@ -65,16 +52,7 @@ clean : .SYMBOLIC
 
 .NOCHECK
 build : $(target_name).lib
-#build : $(target_name).exe
 
 .NOCHECK
 library : $(target_name).lib
-
-.NOCHECK
-run : $(target_name).exe
-	$(target_name).exe
-
-.NOCHECK
-debug : $(target_name).exe
-	wd /swap /trap=rsi $(target_name).exe
 

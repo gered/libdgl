@@ -61,11 +61,13 @@ To build the library:
 
 Will output `DGL.LIB` in the project directory.
 
-To build and run a test program from `TEST.C` using the libDGL sources statically linked:
+To build and run the (incomplete) test suite, look under the "TEST" directory. There you will
+find a separate `MAKEFILE` which assumes that you are running `wmake` from that directory and
+that `DGL.LIB` has already been built.
 
 ```
-> wmake run
-
-> wmake debug                               ; run through WD debugger
+> cd test
+test> wmake run                                 ; run test suite
+test> wmake debug                               ; run through WD debugger
 ```
 

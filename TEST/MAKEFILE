@@ -1,0 +1,57 @@
+target_config = debug
+
+target_name = test
+
+object_files = blit.obj &
+               fixed.obj &
+               line.obj &
+               pal.obj &
+               pcx.obj &
+               pset.obj &
+               rect.obj &
+               surface.obj &
+               test.obj &
+               text.obj &
+               vector2.obj
+
+
+cc_flags_debug = /d2 /zp4 /5r /fp3 /j
+cc_flags_release = /d1+ /zp4 /5r /fp3 /onatx /oe=40 /j
+cc_flags = /mf /i=.. $(cc_flags_$(target_config))
+
+link_flags_debug = debug all
+link_flags_release = debug all
+link_flags = $(link_flags_$(target_config))
+
+.c.obj: .AUTODEPEND
+    wcc386 $[. /zq $(cc_flags)
+
+$(target_name).lnk: $(object_files)
+    %create $^@
+    %append $^@ NAME $(target_name).exe
+    %append $^@ SYSTEM DOS4G
+    %append $^@ OPTION QUIET
+    %append $^@ OPTION STACK=16k
+    %append $^@ LIBRARY ..\dgl.lib
+    @for %i in ($(object_files)) do %append $^@ FILE %i
+
+$(target_name).exe: $(object_files) $(target_name).lnk
+    wlink $(link_flags) @$(target_name).lnk
+
+clean : .SYMBOLIC
+	del *.obj
+    del *.err
+	del $(target_name).exe
+    del $(target_name).lnk
+
+.NOCHECK
+build : $(target_name).exe
+
+.NOCHECK
+run : $(target_name).exe
+	$(target_name).exe
+
+.NOCHECK
+debug : $(target_name).exe
+	wd /swap /trap=rsi $(target_name).exe
+
