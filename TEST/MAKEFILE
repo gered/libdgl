@@ -4,7 +4,10 @@ target_name = test
 
 object_files = blit.obj &
                fixed.obj &
+               helpers.obj &
+               kbrd.obj &
                line.obj &
+               mouse.obj &
                pal.obj &
                pcx.obj &
                pset.obj &

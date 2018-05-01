@@ -3,16 +3,18 @@
 #include "dgl.h"
 #include "helpers.h"
 
-#include "fixed.h"
-#include "vector2.h"
-#include "surface.h"
-#include "pset.h"
-#include "line.h"
-#include "rect.h"
 #include "blit.h"
-#include "text.h"
+#include "fixed.h"
+#include "kbrd.h"
+#include "line.h"
+#include "mouse.h"
 #include "pal.h"
 #include "pcx.h"
+#include "pset.h"
+#include "rect.h"
+#include "surface.h"
+#include "text.h"
+#include "vector2.h"
 
 SURFACE *backbuffer = NULL;
 
@@ -39,6 +41,8 @@ int main(void) {
     ASSERT(backbuffer != NULL);
     ASSERT(backbuffer->width == 320 && backbuffer->height == 200);
 
+    test_keyboard();
+    test_mouse();
     test_fixed();
     test_vector2i();
     test_vector2f();

@@ -21,3 +21,6 @@ extern void _breakpoint();
 
 #endif
 
+void clrscr(unsigned char attr);
+void gotoxy(int x, int y);
+
