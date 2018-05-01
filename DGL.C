@@ -58,9 +58,13 @@ void dgl_set_error(DGL_ERROR error) {
     _last_error = error;
 }
 
+void _dgl_atexit(void) {
+    mouse_shutdown();
+    keyboard_shutdown();
+    video_shutdown();
+}
+
 void dgl_init(void) {
-    atexit(mouse_shutdown);
-    atexit(keyboard_shutdown);
-    atexit(video_shutdown);
+    atexit(_dgl_atexit);
 }
 

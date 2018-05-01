@@ -6,13 +6,14 @@
 void test_fixed(void) {
     fixed a, b, c;
     float af, bf, cf, f;
+    float aaf, bbf, ccf;
     int i;
 
     a = FTOFIX(PI);
     f = FIXTOF(a);
     ASSERT(FFIX_EQU(PI, f));
 
-    a = FTOFIX(-0.37f);
+    a = FTOFIX(-0.38f);
     f = FIXTOF(a);
     ASSERT(FFIX_EQU(-0.38f, f));
 
@@ -57,13 +58,16 @@ void test_fixed(void) {
         f = DEG_TO_RAD(i + 1);
         a = fix_sin(FTOFIX(f));
         af = sin(f);
+        aaf = FIXTOF(a);
         b = fix_cos(FTOFIX(f));
         bf = cos(f);
+        bbf = FIXTOF(b);
         c = fix_tan(FTOFIX(f));
         cf = tan(f);
-        ASSERT(FFIX_EQU(FIXTOF(a), af));
-        ASSERT(FFIX_EQU(FIXTOF(b), bf));
-        ASSERT(FFIX_EQU(FIXTOF(c), cf));
+        ccf = FIXTOF(c);
+        ASSERT(FFIX_EQU(aaf, af));
+        ASSERT(FFIX_EQU(bbf, bf));
+        ASSERT(FFIX_EQU(ccf, cf));
     }
 }
 

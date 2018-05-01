@@ -4,11 +4,11 @@ target_name = dgl
 
 object_files = &
 	dglblit.obj &
-    dglblita.obj &
+	dglblita.obj &
 	dglclip.obj &
 	dgl.obj &
 	dgldraw.obj &
-    dgldrawa.obj &
+	dgldrawa.obj &
 	dglgfx.obj &
 	dglpal.obj &
 	dglkbrd.obj &
@@ -34,7 +34,7 @@ asm_flags = /m /ml $(asm_flags_$(target_config))
 	wcc386 $[. /zq $(cc_flags)
 
 .asm.obj: .AUTODEPEND
-    tasm $[. /t $(asm_flags)
+	tasm $[. /t $(asm_flags)
 
 $(target_name).lbc: $(object_files)
 	%create $^@
@@ -47,6 +47,7 @@ clean : .SYMBOLIC
 	del *.obj
 	del *.err
 	del $(target_name).exe
+	del $(target_name).lib
 	del $(target_name).lnk
 	del $(target_name).lbc
 

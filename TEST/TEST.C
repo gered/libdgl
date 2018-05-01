@@ -69,7 +69,6 @@ int main(void) {
 
     surface_free(backbuffer);
 
-
     return 0;
 }
 

@@ -6,11 +6,10 @@
 #include "dgl.h"
 
 #define F_EQU(a, b) (close_enough((a), (b), TOLERANCE))
-#define FFIX_EQU(a, b) (close_enough((a), (b), 0.01f))
+#define FFIX_EQU(a, b) (close_enough((a), (b), 0.05f))  // wow !
 
 extern void _breakpoint();
 #pragma aux _breakpoint = "int 0x03";
-
 
 #define ASSERT(x) \
     do { \

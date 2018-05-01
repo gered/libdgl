@@ -61,7 +61,9 @@ static float symmetrical_round(float value) {
 }
 
 static boolean close_enough(float a, float b, float tolerance) {
-    return fabs((a - b) / ((b == 0.0f) ? 1.0f : b)) < tolerance;
+    //return fabs((a - b) / ((b == 0.0f) ? 1.0f : b)) < tolerance;
+    // TODO: this is not the best way
+    return fabs(a - b) <= tolerance;
 }
 
 static boolean power_of_2(int n) {
