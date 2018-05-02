@@ -1,8 +1,7 @@
 # libDGL
 
 libDGL is a "retro coding" C library aimed at MS-DOS 
-[VGA Mode 13h](https://en.wikipedia.org/wiki/Mode_13h) game development. It is developed with 
-DJGPP with 486 DX2 systems as a baseline target for performance.
+[VGA Mode 13h](https://en.wikipedia.org/wiki/Mode_13h) game development. It targets 486 DX2 systems as a baseline for performance.
 
 The project is developed with Watcom C 10.0b and Borland Turbo Assembler 4.0.
 
