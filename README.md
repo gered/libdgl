@@ -26,6 +26,7 @@ chock-full of bugs.
 * Graphics clipping
 * Keyboard input
 * Mouse input
+* Input device (keyboard/mouse) events
 * PCX loading/saving
 * Math library (general helpers, 2D vector, 3x3 matrix)
 * Fixed point math
@@ -38,7 +39,6 @@ chock-full of bugs.
 * "Mode 7" like support
 * Custom font loading (BIOS-like format?)
 * Joystick / Gravis GamePad support
-* Input device (keyboard/mouse/joystick) events
 * PC speaker sounds
 * Sound Blaster compatible sound/music
 * Gravis Ultrasound compatible sound/music
