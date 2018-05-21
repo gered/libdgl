@@ -4,6 +4,7 @@
 #include "helpers.h"
 
 #include "blit.h"
+#include "events.h"
 #include "fixed.h"
 #include "kbrd.h"
 #include "line.h"
@@ -43,6 +44,7 @@ int main(void) {
 
     test_keyboard();
     test_mouse();
+    test_events();
     test_fixed();
     test_vector2i();
     test_vector2f();

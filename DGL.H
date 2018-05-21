@@ -18,6 +18,7 @@
 #include "dglmtx33.h"
 #include "dglutil.h"
 #include "dglpcx.h"
+#include "dglevent.h"
 
 void dgl_init(void);
 

@@ -9,6 +9,7 @@ object_files = &
 	dgl.obj &
 	dgldraw.obj &
 	dgldrawa.obj &
+    dglevent.obj &
 	dglgfx.obj &
 	dglpal.obj &
 	dglkbrd.obj &

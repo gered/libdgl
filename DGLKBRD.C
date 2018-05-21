@@ -1,4 +1,5 @@
 #include "dglkbrd.h"
+#include "dglevent.h"
 #include "dglutil.h"
 #include "dglerror.h"
 #include <string.h>
@@ -22,6 +23,7 @@
 #define KEYBRD_LED_CAPSLOCK    0x4
 
 static boolean _installed = FALSE;
+static INPUTEVENT *keyboard_event;
 
 volatile ubyte keys[128];
 
@@ -63,6 +65,20 @@ static boolean send_kb_data(ubyte data) {
     return (result == 0xFA);
 }
 
+static void push_keyboard_event(KEY key, EVENT_ACTION action) {
+    if (_events_enabled) {
+        // HACK: skipping extended (?) key extra keyscan code.
+        //       we only actually care about the subsequent key code...
+        //       (this is a terrible way to do this, doesn't handle all cases)
+        if (key != 0x60) {
+            _events_push(&keyboard_event);
+            keyboard_event->type = EVENT_TYPE_KEYBOARD;
+            keyboard_event->keyboard.key = key;
+            keyboard_event->keyboard.action = action;
+        }
+    }
+}
+
 // keyboard interrupt handler
 void interrupt far kb_int_handler(void) {
     // read scan code of key that was just pressed
@@ -72,8 +88,14 @@ void interrupt far kb_int_handler(void) {
         // the actual key scan code
         _key_scan &= 0x7f;
         keys[(int)_key_scan] = 0;
+        push_keyboard_event(_key_scan, EVENT_ACTION_RELEASED);
     } else {
-        keys[(int)_key_scan] = 1;
+        if (keys[(int)_key_scan])
+            push_keyboard_event(_key_scan, EVENT_ACTION_HELD);
+        else {
+            keys[(int)_key_scan] = 1;
+            push_keyboard_event(_key_scan, EVENT_ACTION_PRESSED);
+        }
     }
 
     _key_last_scan = _key_scan;

@@ -3,6 +3,8 @@
 
 #include "dglcmn.h"
 
+typedef byte MOUSE_BUTTON;
+
 #define MOUSE_LEFTBUTTON   0x01
 #define MOUSE_RIGHTBUTTON  0x02
 #define MOUSE_CENTERBUTTON 0x04

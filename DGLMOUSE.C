@@ -1,4 +1,5 @@
 #include "dglmouse.h"
+#include "dglevent.h"
 #include "dglerror.h"
 #include <string.h>
 #include <dos.h>
@@ -6,11 +7,14 @@
 static boolean _installed = FALSE;
 static boolean _has_mouse = FALSE;
 
+static INPUTEVENT *mouse_event;
+
 volatile int mouse_x;
 volatile int mouse_y;
 volatile int mouse_buttons;
 volatile int mouse_delta_x;
 volatile int mouse_delta_y;
+volatile int mouse_prev_buttons;
 
 static void reset_mouse_state(void) {
     mouse_x = 0;
@@ -18,6 +22,7 @@ static void reset_mouse_state(void) {
     mouse_buttons = 0;
     mouse_delta_x = 0;
     mouse_delta_y = 0;
+    mouse_prev_buttons = 0;
 }
 
 static boolean init_mouse_driver(void) {
@@ -38,9 +43,29 @@ static void update_mouse_state(void) {
     int386(0x33, &regs, &regs);
     mouse_x = (regs.w.cx / 2);
     mouse_y = regs.w.dx;
+    mouse_prev_buttons = mouse_buttons;
     mouse_buttons = regs.w.bx;
     mouse_delta_x = 0;
     mouse_delta_y = 0;
+}
+
+static void push_motion_event(void) {
+    _events_push(&mouse_event);
+    mouse_event->type = EVENT_TYPE_MOUSE_MOTION;
+    mouse_event->mouse_motion.x = mouse_x;
+    mouse_event->mouse_motion.y = mouse_y;
+    mouse_event->mouse_motion.x_delta = mouse_delta_x;
+    mouse_event->mouse_motion.y_delta = mouse_delta_y;
+    mouse_event->mouse_motion.buttons = mouse_buttons;
+}
+
+static void push_button_event(EVENT_ACTION action, MOUSE_BUTTON button) {
+    _events_push(&mouse_event);
+    mouse_event->type = EVENT_TYPE_MOUSE_BUTTON;
+    mouse_event->mouse_button.x = mouse_x;
+    mouse_event->mouse_button.y = mouse_y;
+    mouse_event->mouse_button.action = action;
+    mouse_event->mouse_button.button = button;
 }
 
 #pragma off (check_stack)
@@ -50,7 +75,40 @@ void __loadds far mouse_int_handler(int eax, int ebx, int ecx, int edx) {
     mouse_delta_y = edx - mouse_y;
     mouse_x = (ecx / 2);
     mouse_y = edx;
+    mouse_prev_buttons = mouse_buttons;
     mouse_buttons = ebx;
+
+    if (_events_enabled) {
+        if (mouse_delta_x || mouse_delta_y) {
+            push_motion_event();
+        }
+
+        if (mouse_buttons != mouse_prev_buttons) {
+            if ((mouse_buttons & MOUSE_LEFTBUTTON) !=
+                (mouse_prev_buttons & MOUSE_LEFTBUTTON)) {
+                if (mouse_buttons & MOUSE_LEFTBUTTON)
+                    push_button_event(EVENT_ACTION_PRESSED, MOUSE_LEFTBUTTON);
+                else
+                    push_button_event(EVENT_ACTION_RELEASED, MOUSE_LEFTBUTTON);
+            }
+
+            if ((mouse_buttons & MOUSE_RIGHTBUTTON) !=
+                (mouse_prev_buttons & MOUSE_RIGHTBUTTON)) {
+                if (mouse_buttons & MOUSE_RIGHTBUTTON)
+                    push_button_event(EVENT_ACTION_PRESSED, MOUSE_RIGHTBUTTON);
+                else
+                    push_button_event(EVENT_ACTION_RELEASED, MOUSE_RIGHTBUTTON);
+            }
+
+            if ((mouse_buttons & MOUSE_CENTERBUTTON) !=
+                (mouse_prev_buttons & MOUSE_CENTERBUTTON)) {
+                if (mouse_buttons & MOUSE_CENTERBUTTON)
+                    push_button_event(EVENT_ACTION_PRESSED, MOUSE_CENTERBUTTON);
+                else
+                    push_button_event(EVENT_ACTION_RELEASED, MOUSE_CENTERBUTTON);
+            }
+        }
+    }
 }
 #pragma on (check_stack)
 

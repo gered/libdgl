@@ -45,6 +45,8 @@ const char* dgl_last_error_message(void) {
             return "Failed to set mouse interrupt handler callback.";
         case DGL_MOUSE_INT_CALLBACK_RESTORE_FAILURE:
             return "Failed to restore original mouse interrupt handler callback.";
+        case DGL_EVENTS_ALREADY_INITIALIZED:
+            return "Input device events subsystem is already initialized.";
         case DGL_IO_ERROR:
             return "File IO error.";
         case DGL_PCX_BAD_FORMAT:
@@ -59,6 +61,7 @@ void dgl_set_error(DGL_ERROR error) {
 }
 
 void _dgl_atexit(void) {
+    events_shutdown();
     mouse_shutdown();
     keyboard_shutdown();
     video_shutdown();
