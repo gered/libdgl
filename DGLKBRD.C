@@ -116,6 +116,25 @@ static char lookup_key_to_char_numpad[128] = {
     0,    0,    0,    0,    0,    0,    0,    0,    // 28 - 2F
     0,    0,    0,    0,    0,    0,    0,    0,    // 30 - 37
     0,    0,    0,    0,    0,    0,    0,    0,    // 38 - 3F
+    0,    0,    0,    0,    0,    0,    0,    0,    // 40 - 47
+    0,    0,    '-',  0,    0,    0,    '+',  0,    // 48 - 4F
+    0,    0,    0,    0,    0,    0,    0,    0,    // 50 - 57
+    0,    0,    0,    0,    0,    0,    0,    0,    // 58 - 5F
+    0,    0,    0,    0,    0,    0,    0,    0,    // 60 - 67
+    0,    0,    0,    0,    0,    0,    0,    0,    // 68 - 6F
+    0,    0,    0,    0,    0,    0,    0,    0,    // 70 - 77
+    0,    0,    0,    0,    0,    0,    0,    0     // 78 - 7F
+};
+
+static char lookup_key_to_char_numpad_numlock[128] = {
+    0,    0,    0,    0,    0,    0,    0,    0,    // 00 - 07
+    0,    0,    0,    0,    0,    0,    0,    0,    // 08 - 0F
+    0,    0,    0,    0,    0,    0,    0,    0,    // 10 - 17
+    0,    0,    0,    0,    0,    0,    0,    0,    // 18 - 1F
+    0,    0,    0,    0,    0,    0,    0,    0,    // 20 - 27
+    0,    0,    0,    0,    0,    0,    0,    0,    // 28 - 2F
+    0,    0,    0,    0,    0,    0,    0,    0,    // 30 - 37
+    0,    0,    0,    0,    0,    0,    0,    0,    // 38 - 3F
     0,    0,    0,    0,    0,    0,    0,    '7',  // 40 - 47
     '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',  // 48 - 4F
     '2',  '3',  '0',  '.',  0,    0,    0,    0,    // 50 - 57
@@ -222,7 +241,7 @@ static boolean handler_filter_keys(void) {
     if (BIT_ISSET(KEYBRD_MOD_EXTENDED, key_mod)) {
         // extended key + leftshift comes with cursor key presses when
         // numlock is enabled
-        if ((_key_scan & 0x7f) == (KEY)KEY_LEFTSHIFT)
+        if ((_key_scan & 0x7f) == KEY_LEFTSHIFT)
             return TRUE;
     }
     return FALSE;
@@ -231,17 +250,17 @@ static boolean handler_filter_keys(void) {
 // maintains BIOS keyboard flags/led toggle states (caps/num/scroll lock)
 static void handler_update_flags_and_leds(void) {
     switch (_key_scan) {
-        case (KEY)KEY_CAPSLOCK:
+        case KEY_CAPSLOCK:
             BIT_TOGGLE(KEYBRD_FLAGS_CAPSLOCK, key_flags);
             update_kb_led(key_flags);
             set_kb_flags(key_flags);
             break;
-        case (KEY)KEY_NUMLOCK:
+        case KEY_NUMLOCK:
             BIT_TOGGLE(KEYBRD_FLAGS_NUMLOCK, key_flags);
             update_kb_led(key_flags);
             set_kb_flags(key_flags);
             break;
-        case (KEY)KEY_SCROLLLOCK:
+        case KEY_SCROLLLOCK:
             BIT_TOGGLE(KEYBRD_FLAGS_SCROLLOCK, key_flags);
             update_kb_led(key_flags);
             set_kb_flags(key_flags);
@@ -371,14 +390,25 @@ void keyboard_wait_for_key(KEY key) {
 }
 
 char key_to_char(KEY key, uword modifiers) {
+    // this is really just here because of the stupid slash key on the numpad
+    // (but maybe it will be useful for other types of keyboards later...)
     if (BIT_ISSET(KEYBRD_MOD_EXTENDED, modifiers)) {
         return lookup_key_to_char_extended[(int)key];
     }
 
-    else if ((key >= (KEY)0x47) && (key <= (KEY)0x53)) {
-        if (BIT_ISSET(KEYBRD_MOD_NUMLOCK, modifiers) &&
-            !BIT_ISSET(KEYBRD_MOD_SHIFT, modifiers))
-            return lookup_key_to_char_numpad[(int)key];
+    // handle numpad keys specially
+    else if ((key >= 0x47) && (key <= 0x53)) {
+        if (BIT_ISSET(KEYBRD_MOD_NUMLOCK, modifiers)) {
+            if (BIT_ISSET(KEYBRD_MOD_SHIFT, modifiers))
+                return lookup_key_to_char_numpad[(int)key];
+            else
+                return lookup_key_to_char_numpad_numlock[(int)key];
+        } else {
+            if (BIT_ISSET(KEYBRD_MOD_SHIFT, modifiers))
+                return lookup_key_to_char_numpad_numlock[(int)key];
+            else
+                return lookup_key_to_char_numpad[(int)key];
+        }
 
     } else {
         if (BIT_ISSET(KEYBRD_MOD_CAPSLOCK, modifiers)) {
