@@ -29,9 +29,10 @@ void test_events(void) {
 
         switch (event->type) {
             case EVENT_TYPE_KEYBOARD:
-                printf("KEYBOARD: %2d - %d\n",
+                printf("KEYBOARD: %2d - %d (%d)\n",
                        event->keyboard.key,
-                       event->keyboard.action);
+                       event->keyboard.action,
+                       event->keyboard.mod);
                 break;
 
             case EVENT_TYPE_MOUSE_MOTION:

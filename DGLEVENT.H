@@ -20,6 +20,7 @@ typedef byte EVENT_ACTION;
 typedef struct {
     KEY key;
     EVENT_ACTION action;
+    uword mod;
 } INPUTEVENT_KEYBOARD;
 
 typedef struct {
