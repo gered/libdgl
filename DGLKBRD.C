@@ -216,6 +216,8 @@ static void push_keyboard_event(KEY key, EVENT_ACTION action) {
     }
 }
 
+// returns TRUE if the key interrupt event should not be handled (at least
+// as far as updating key state is concerned)
 static boolean handler_filter_keys(void) {
     if (BIT_ISSET(KEYBRD_MOD_EXTENDED, key_mod)) {
         // extended key + leftshift comes with cursor key presses when
@@ -226,6 +228,7 @@ static boolean handler_filter_keys(void) {
     return FALSE;
 }
 
+// maintains BIOS keyboard flags/led toggle states (caps/num/scroll lock)
 static void handler_update_flags_and_leds(void) {
     switch (_key_scan) {
         case (KEY)KEY_CAPSLOCK:
@@ -248,6 +251,7 @@ static void handler_update_flags_and_leds(void) {
     }
 }
 
+// updates modifier state based on current BIOS flags and/or key states
 static void handler_update_modifiers(void) {
     if (BIT_ISSET(KEYBRD_FLAGS_NUMLOCK, key_flags))
         BIT_SET(KEYBRD_MOD_NUMLOCK, key_mod);
@@ -266,13 +270,24 @@ static void handler_update_modifiers(void) {
 }
 
 // keyboard interrupt handler
+// TODO: handle 'Pause' key... it's kind of a weird one and this all doesn't
+//       take care of it at all.
+//       also, i suspect this may all have issues with international keyboards
+//       but i don't own any so cannot test...
 void interrupt far kb_int_handler(void) {
     // read scan code of key that was just pressed
     _key_scan = inp(KEYBRD_DATA_PORT);
-    if (_key_scan == KEY_EXTENDED) {
-        // extended key scan
-        BIT_SET(KEYBRD_MOD_EXTENDED, key_mod);
 
+    // handle updating key state and flags/modifiers ...
+    if (_key_scan == KEY_EXTENDED) {
+        // "extended key" events come in as two events to this interrupt
+        // handler. the first has _key_scan = 0xe0 (0x60 in a released state).
+        // so we catch this "weird" _key_scan value and set the extended
+        // modifier here and skip updating any other keyboard state.
+        // for the key event that will follow immediately after this, _key_scan
+        // will have the _actual_ key that was pressed, but the modifier will
+        // be set correctly and we can handle it specially if needed.
+        BIT_SET(KEYBRD_MOD_EXTENDED, key_mod);
     } else {
         if (!handler_filter_keys()) {
             if (_key_scan & 0x80) {
@@ -283,10 +298,12 @@ void interrupt far kb_int_handler(void) {
                 handler_update_modifiers();
                 push_keyboard_event(_key_scan, EVENT_ACTION_RELEASED);
             } else {
-                if (keys[(int)_key_scan])
+                if (keys[(int)_key_scan]) {
+                    // nothing interesting to do for held (repeat) events...
                     push_keyboard_event(_key_scan, EVENT_ACTION_HELD);
-                else {
+                } else {
                     keys[(int)_key_scan] = 1;
+                    // toggle states only need to be handled for a down event
                     handler_update_flags_and_leds();
                     handler_update_modifiers();
                     push_keyboard_event(_key_scan, EVENT_ACTION_PRESSED);
@@ -295,6 +312,7 @@ void interrupt far kb_int_handler(void) {
             _key_last_scan = _key_scan;
         }
 
+        // clear extended modifier for the following event(s) in any case
         BIT_CLEAR(KEYBRD_MOD_EXTENDED, key_mod);
     }
 
@@ -356,12 +374,12 @@ char key_to_char(KEY key, uword modifiers) {
     if (BIT_ISSET(KEYBRD_MOD_EXTENDED, modifiers)) {
         return lookup_key_to_char_extended[(int)key];
     }
+
     else if ((key >= (KEY)0x47) && (key <= (KEY)0x53)) {
         if (BIT_ISSET(KEYBRD_MOD_NUMLOCK, modifiers) &&
             !BIT_ISSET(KEYBRD_MOD_SHIFT, modifiers))
             return lookup_key_to_char_numpad[(int)key];
-        else
-            return 0;
+
     } else {
         if (BIT_ISSET(KEYBRD_MOD_CAPSLOCK, modifiers)) {
             if (BIT_ISSET(KEYBRD_MOD_SHIFT, modifiers))
@@ -375,5 +393,7 @@ char key_to_char(KEY key, uword modifiers) {
                 return lookup_key_to_char[(int)key];
         }
     }
+
+    return 0;
 }
 
