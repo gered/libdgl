@@ -84,6 +84,8 @@
 #define KEY_PAGEDOWN     0x51
 #define KEY_INSERT       0x52
 #define KEY_DELETE       0x53
+#define KEY_F11          0x57
+#define KEY_F12          0x58
 
 #endif
 
