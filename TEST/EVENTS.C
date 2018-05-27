@@ -31,10 +31,11 @@ void test_events(void) {
         switch (event->type) {
             case EVENT_TYPE_KEYBOARD:
                 ch = key_to_char(event->keyboard.key, event->keyboard.mod);
-                printf("KEYBOARD: %2d - %d (%d) - \"%c\"\n",
+                printf("KEYBOARD: %2d - %d (%d) - '%c' (%d)\n",
                        event->keyboard.key,
                        event->keyboard.action,
                        event->keyboard.mod,
+                       ch,
                        ch);
                 break;
 
