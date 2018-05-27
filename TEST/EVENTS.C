@@ -6,6 +6,7 @@
 void test_events(void) {
     boolean result;
     INPUTEVENT *event;
+    char ch;
 
     clrscr(0);
     delay(500);
@@ -29,10 +30,12 @@ void test_events(void) {
 
         switch (event->type) {
             case EVENT_TYPE_KEYBOARD:
-                printf("KEYBOARD: %2d - %d (%d)\n",
+                ch = key_to_char(event->keyboard.key, event->keyboard.mod);
+                printf("KEYBOARD: %2d - %d (%d) - \"%c\"\n",
                        event->keyboard.key,
                        event->keyboard.action,
-                       event->keyboard.mod);
+                       event->keyboard.mod,
+                       ch);
                 break;
 
             case EVENT_TYPE_MOUSE_MOTION:

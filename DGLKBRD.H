@@ -51,5 +51,7 @@ KEY keyboard_read_key(void);
  */
 void keyboard_wait_for_key(KEY key);
 
+char key_to_char(KEY key, uword modifiers);
+
 #endif
 
