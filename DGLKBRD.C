@@ -1,10 +1,11 @@
 #include "dglkbrd.h"
+#include "dgl.h"
 #include "dglcmn.h"
 #include "dglevent.h"
 #include "dglutil.h"
-#include "dglerror.h"
-#include <string.h>
+#include <conio.h>
 #include <dos.h>
+#include <string.h>
 
 #define PIC_CTRL_PORT          0x20
 #define KEYBRD_DATA_PORT       0x60
@@ -21,15 +22,15 @@
 
 #define KEY_EXTENDED           ((KEY)0xe0)
 
-static boolean _installed = FALSE;
+static bool _installed = false;
 static INPUTEVENT *keyboard_event;
 
-volatile ubyte keys[128];
+volatile uint8 keys[128];
 
 volatile KEY _key_last_scan;
 volatile KEY _key_scan;
-volatile uword key_flags;
-volatile uword key_mod;
+volatile uint16 key_flags;
+volatile uint16 key_mod;
 
 static char lookup_key_to_char[128] = {
     0,    0,    '1',  '2',  '3',  '4',  '5',  '6',  // 00 - 07
@@ -189,9 +190,9 @@ static void wait_kb_data_write() {
 }
 
 // sends data to the keyboard data port. checks for success
-// and returns TRUE if the data write succeeded
-static boolean send_kb_data(ubyte data) {
-    ubyte result;
+// and returns true if the data write succeeded
+static bool send_kb_data(uint8 data) {
+    uint8 result;
 
     wait_kb_data_write();
     outp(KEYBRD_DATA_PORT, data);
@@ -201,28 +202,28 @@ static boolean send_kb_data(ubyte data) {
     return (result == 0xFA);
 }
 
-static uword get_kb_flags(void) {
-    return *((uword*)KEYBRD_FLAGS_ADDR);
+static uint16 get_kb_flags(void) {
+    return *((uint16*)KEYBRD_FLAGS_ADDR);
 }
 
-static void set_kb_flags(uword flags) {
-    *((uword*)KEYBRD_FLAGS_ADDR) = flags;
+static void set_kb_flags(uint16 flags) {
+    *((uint16*)KEYBRD_FLAGS_ADDR) = flags;
 }
 
 // updates the keyboard indicator LEDs from the num/caps/scroll lock flags
 // set in the passed keyboard flags. returns FALSE if the LEDs could not
 // be updated (if keyboard data write did not succeed)
-static boolean update_kb_led(byte flags) {
+static bool update_kb_led(uint8 flags) {
     if (!send_kb_data(KEYBRD_CMD_SET_LED)) {
         dgl_set_error(DGL_KEYBOARD_UPDATE_LED_FAILURE);
-        return FALSE;
+        return false;
     }
     if (!send_kb_data((flags >> 4) & 3)) {
         dgl_set_error(DGL_KEYBOARD_UPDATE_LED_FAILURE);
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 static void push_keyboard_event(KEY key, EVENT_ACTION action) {
@@ -235,16 +236,16 @@ static void push_keyboard_event(KEY key, EVENT_ACTION action) {
     }
 }
 
-// returns TRUE if the key interrupt event should not be handled (at least
+// returns true if the key interrupt event should not be handled (at least
 // as far as updating key state is concerned)
-static boolean handler_filter_keys(void) {
+static bool handler_filter_keys(void) {
     if (BIT_ISSET(KEYBRD_MOD_EXTENDED, key_mod)) {
         // extended key + leftshift comes with cursor key presses when
         // numlock is enabled
         if ((_key_scan & 0x7f) == KEY_LEFTSHIFT)
-            return TRUE;
+            return true;
     }
-    return FALSE;
+    return false;
 }
 
 // maintains BIOS keyboard flags/led toggle states (caps/num/scroll lock)
@@ -336,16 +337,16 @@ void interrupt far kb_int_handler(void) {
     }
 
     // indicate key event was processed to keyboard controller
-    _key_scan = inp(KEYBRD_CTRL_PORT) | 0x82;
+    _key_scan = inp(KEYBRD_CTRL_PORT) | 0x80;
     outp(KEYBRD_CTRL_PORT, _key_scan);
     outp(KEYBRD_CTRL_PORT, _key_scan & 0x7f);
     outp(PIC_CTRL_PORT, 0x20);
 }
 
-boolean keyboard_init(void) {
+bool keyboard_init(void) {
     if (_installed) {
         dgl_set_error(DGL_KEYBOARD_ALREADY_INITIALIZED);
-        return FALSE;
+        return false;
     }
 
     reset_key_states();
@@ -356,23 +357,23 @@ boolean keyboard_init(void) {
     _old_handler = _dos_getvect(9);
     _dos_setvect(9, kb_int_handler);
 
-    _installed = TRUE;
-    return TRUE;
+    _installed = true;
+    return true;
 }
 
-boolean keyboard_shutdown(void) {
+bool keyboard_shutdown(void) {
     if (!_installed)
-        return TRUE;  // don't care
+        return true;  // don't care
 
     _dos_setvect(9, _old_handler);
 
     reset_key_states();
 
-    _installed = FALSE;
-    return TRUE;
+    _installed = false;
+    return true;
 }
 
-boolean keyboard_is_initialized(void) {
+bool keyboard_is_initialized(void) {
     return _installed;
 }
 
@@ -389,7 +390,7 @@ void keyboard_wait_for_key(KEY key) {
     }
 }
 
-char key_to_char(KEY key, uword modifiers) {
+char key_to_char(KEY key, uint16 modifiers) {
     // this is really just here because of the stupid slash key on the numpad
     // (but maybe it will be useful for other types of keyboards later...)
     if (BIT_ISSET(KEYBRD_MOD_EXTENDED, modifiers)) {

@@ -1,5 +1,6 @@
 #include "fixed.h"
-#include "dgl.h"
+#include "dglfixp.h"
+#include "dglmath.h"
 #include <stdio.h>
 #include "helpers.h"
 

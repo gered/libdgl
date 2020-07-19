@@ -7,18 +7,18 @@ codeseg
 
 locals
 
-public direct_rect_f_
-public direct_filled_rect_f_
+public lowlevel_rect_f_
+public lowlevel_filled_rect_f_
 
 
-; direct_rect_f_
+; lowlevel_rect_f_
 ;    eax    = color
 ;    edx    = width
 ;    ebx    = y_inc
 ;    ecx    = lines
 ;    ebp+8  = p1
 ;    ebp+12 = p2
-proc direct_rect_f_ near
+proc lowlevel_rect_f_ near
 arg @@p1:dword, @@p2:dword
 
     push ebp
@@ -82,13 +82,13 @@ arg @@p1:dword, @@p2:dword
 
     endp
 
-; direct_filled_rect_f_
+; lowlevel_filled_rect_f_
 ;    eax    = color
 ;    edx    = y_inc
 ;    ebx    = width
 ;    ecx    = lines
 ;    ebp+8  = dest
-proc direct_filled_rect_f_ near
+proc lowlevel_filled_rect_f_ near
 arg @@dest:dword
 
     push ebp
@@ -98,7 +98,7 @@ arg @@dest:dword
 
     mov esi, ecx          ; get number of lines to be drawn
     test esi, esi         ; if there are no lines to draw, then return
-    jz @@done
+    jz @@early_done
 
     mov ah, al            ; spread color byte out over all 32-bits
     shl eax, 8            ; so 4 pixels can be written horizontally
@@ -148,6 +148,7 @@ arg @@dest:dword
 
 @@done:
     pop ebp
+@@early_done:
     pop esi
     pop edi
     pop ebp

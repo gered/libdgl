@@ -1,19 +1,19 @@
 #include "mouse.h"
-#include "dgl.h"
+#include "dglmouse.h"
 #include <dos.h>
 #include <stdio.h>
 #include "helpers.h"
 
 void test_mouse(void) {
-    boolean result;
+    bool result;
 
     clrscr(0);
 
-    ASSERT(mouse_is_initialized() == FALSE);
+    ASSERT(mouse_is_initialized() == false);
 
     result = mouse_init();
-    ASSERT(result == TRUE);
-    ASSERT(mouse_is_initialized() == TRUE);
+    ASSERT(result == true);
+    ASSERT(mouse_is_initialized() == true);
 
     // this may seem a little weird to check for a mouse AFTER init, but
     // it's the init call that determines if a mouse is present :)
@@ -37,8 +37,8 @@ void test_mouse(void) {
 
     // need to close down the mouse subsystem even if one is not present
     result = mouse_shutdown();
-    ASSERT(result == TRUE);
-    ASSERT(mouse_is_initialized() == FALSE);
+    ASSERT(result == true);
+    ASSERT(mouse_is_initialized() == false);
 
     gotoxy(0, 23);
     printf("Press a key to continue...\n");

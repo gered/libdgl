@@ -1,20 +1,21 @@
+#include "dgl.h"
 #include "dglgfx.h"
 #include "dglblit.h"
 #include "dglutil.h"
-#include "dglerror.h"
+#include <conio.h>
 #include <stdlib.h>
 #include <string.h>
 
-extern void _video_mode(int mode);
-#pragma aux _video_mode = \
-    "int 0x10"            \
+extern void set_video_mode(int mode);
+#pragma aux set_video_mode = \
+    "int 0x10"               \
     parm [eax];
 
-static boolean _initialized = FALSE;
+static bool _initialized = false;
 
 SURFACE *screen = NULL;
 
-static SURFACE* surface_create_internal(int width, int height, byte *pixels) {
+static SURFACE* surface_create_internal(int width, int height, uint8 *pixels) {
     SURFACE *surface = (SURFACE*)malloc(sizeof(SURFACE));
 
     surface->width = width;
@@ -27,49 +28,47 @@ static SURFACE* surface_create_internal(int width, int height, byte *pixels) {
         surface->pixels = pixels;
     } else {
         int size = width * height;
-        surface->pixels = (byte*)malloc(size);
+        surface->pixels = (uint8*)malloc(size);
         mem_fill(surface->pixels, 0, size);
     }
 
     return surface;
 }
 
-boolean video_init(void) {
-    byte *framebuffer;
+bool gfx_init(void) {
 
     if (_initialized) {
         dgl_set_error(DGL_VIDEO_ALREADY_INITIALIZED);
-        return FALSE;
+        return false;
     }
 
-    _video_mode(0x13);
+    set_video_mode(0x13);
 
-    framebuffer = (byte*)0xa0000;
-    screen = surface_create_internal(320, 200, framebuffer);
+    screen = surface_create_internal(320, 200, (uint8*)0xa0000);
     surface_clear(screen, 0);
 
-    _initialized = TRUE;
-    return TRUE;
+    _initialized = true;
+    return true;
 }
 
-boolean video_shutdown(void) {
+bool gfx_shutdown(void) {
     if (!_initialized)
-        return TRUE;   // don't care
+        return true;   // don't care
 
-    _video_mode(0x03);
+    set_video_mode(0x03);
 
     surface_free(screen);
     screen = NULL;
 
-    _initialized = FALSE;
-    return TRUE;
+    _initialized = false;
+    return true;
 }
 
-boolean video_is_initialized(void) {
+bool gfx_is_initialized(void) {
     return _initialized;
 }
 
-void video_wait_vsync(void) {
+void wait_vsync(void) {
     do {} while (inp(0x3da) & 0x8);
     do {} while (!(inp(0x3da) & 0x8));
 }
@@ -84,12 +83,13 @@ void surface_free(SURFACE *surface) {
 
     if (!BIT_ISSET(SURFACE_FLAGS_ALIASED, surface->flags))
         free(surface->pixels);
+
     free(surface);
 }
 
-void surface_clear(SURFACE *surface, int color) {
+void surface_clear(SURFACE *surface, uint8 color) {
     int length = surface->width * surface->height;
-    mem_fill(surface->pixels, (byte)color, length);
+    mem_fill(surface->pixels, color, length);
 }
 
 void surface_copy(const SURFACE *src, SURFACE *dest) {
@@ -97,7 +97,7 @@ void surface_copy(const SURFACE *src, SURFACE *dest) {
         int length = src->width * src->height;
         mem_copy(dest->pixels, src->pixels, length);
     } else {
-        surface_blit(src, dest, 0, 0);
+        blit(src, dest, 0, 0);
     }
 }
 

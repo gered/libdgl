@@ -1,5 +1,7 @@
 #include "pal.h"
-#include "dgl.h"
+#include "dglgfx.h"
+#include "dgldraw.h"
+#include "dglpal.h"
 #include <stdio.h>
 #include "helpers.h"
 
@@ -7,14 +9,14 @@
 // color 15's RGB values.
 void test_palette(void) {
     int i, x, y;
-    byte r, g, b;
+    uint8 r, g, b;
 
     surface_clear(screen, 0);
 
     i = 0;
     for (y = 0; y < 16; ++y) {
         for (x = 0; x < 16; ++x) {
-            surface_filled_rect(screen, x * 8, y * 8, x * 8 + 7, y * 8 + 7, i);
+            draw_filled_rect(screen, x * 8, y * 8, x * 8 + 7, y * 8 + 7, i);
             ++i;
         }
     }
@@ -31,13 +33,13 @@ void test_palette(void) {
 
 void test_palette_fading(void) {
     int i, x, y;
-    byte palette[768];
+    uint8 palette[768];
     surface_clear(screen, 0);
 
     i = 0;
     for (y = 0; y < 16; ++y) {
         for (x = 0; x < 16; ++x) {
-            surface_filled_rect(screen, x * 8, y * 8, x * 8 + 7, y * 8 + 7, i);
+            draw_filled_rect(screen, x * 8, y * 8, x * 8 + 7, y * 8 + 7, i);
             ++i;
         }
     }

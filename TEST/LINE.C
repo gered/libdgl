@@ -1,5 +1,6 @@
 #include "line.h"
-#include "dgl.h"
+#include "dgldraw.h"
+#include "dglmath.h"
 #include <stdio.h>
 
 // draws two horizontal lines, with red pixels marking the extents of the
@@ -11,21 +12,21 @@ void test_hline(void) {
 
     x1 = 10; x2 = 100; y = 20;
 
-    surface_pset(screen, x1 - 1, y, 4);
-    surface_pset(screen, x2 + 1, y, 4);
-    surface_hline(screen, x1, x2, y, 1);
+    pset(screen, x1 - 1, y, 4);
+    pset(screen, x2 + 1, y, 4);
+    draw_hline(screen, x1, x2, y, 1);
 
     y = 30;
 
-    surface_pset(screen, x1 - 1, y, 4);
-    surface_pset(screen, x2 + 1, y, 4);
-    surface_hline(screen, x2, x1, y, 2);
+    pset(screen, x1 - 1, y, 4);
+    pset(screen, x2 + 1, y, 4);
+    draw_hline(screen, x2, x1, y, 2);
 
     x1 = 200; x2 = 300; y = 20;
 
-    surface_pset(screen, x1 - 1, y, 4);
-    surface_pset(screen, x2 + 1, y, 4);
-    surface_hline_f(screen, x1, x2, y, 1);
+    pset(screen, x1 - 1, y, 4);
+    pset(screen, x2 + 1, y, 4);
+    draw_hline_f(screen, x1, x2, y, 1);
 
     getch();
 }
@@ -40,15 +41,15 @@ void test_hline_clipping(void) {
     surface_clear(screen, 0);
 
     x1 = -50; x2 = 50; y = 6;
-    surface_pset(screen, x2 + 1, y, 4);
-    surface_hline(screen, x1, x2, y, 1);
+    pset(screen, x2 + 1, y, 4);
+    draw_hline(screen, x1, x2, y, 1);
 
     x1 = 300; x2 = 340; y = 130;
-    surface_pset(screen, x1 - 1, y, 4);
-    surface_hline(screen, x1, x2, y, 2);
+    pset(screen, x1 - 1, y, 4);
+    draw_hline(screen, x1, x2, y, 2);
 
-    surface_hline(screen, 100, 200, -10, 3);
-    surface_hline(screen, 20, 80, 250, 5);
+    draw_hline(screen, 100, 200, -10, 3);
+    draw_hline(screen, 20, 80, 250, 5);
 
     getch();
 }
@@ -62,21 +63,21 @@ void test_vline(void) {
 
     x = 50; y1 = 10; y2 = 100;
 
-    surface_pset(screen, x, y1 - 1, 4);
-    surface_pset(screen, x, y2 + 1, 4);
-    surface_vline(screen, x, y1, y2, 1);
+    pset(screen, x, y1 - 1, 4);
+    pset(screen, x, y2 + 1, 4);
+    draw_vline(screen, x, y1, y2, 1);
 
     x = 60;
 
-    surface_pset(screen, x, y1 - 1, 4);
-    surface_pset(screen, x, y2 + 1, 4);
-    surface_vline(screen, x, y2, y1, 2);
+    pset(screen, x, y1 - 1, 4);
+    pset(screen, x, y2 + 1, 4);
+    draw_vline(screen, x, y2, y1, 2);
 
     x = 150; y1 = 10; y2 = 100;
 
-    surface_pset(screen, x, y1 - 1, 4);
-    surface_pset(screen, x, y2 + 1, 4);
-    surface_vline_f(screen, x, y1, y2, 1);
+    pset(screen, x, y1 - 1, 4);
+    pset(screen, x, y2 + 1, 4);
+    draw_vline_f(screen, x, y1, y2, 1);
 
     getch();
 }
@@ -91,15 +92,15 @@ void test_vline_clipping(void) {
     surface_clear(screen, 0);
 
     x = 20; y1 = -32; y2 = 32;
-    surface_pset(screen, x, y2 + 1, 4);
-    surface_vline(screen, x, y1, y2, 1);
+    pset(screen, x, y2 + 1, 4);
+    draw_vline(screen, x, y1, y2, 1);
 
     x = 270; y1 = 245; y2 = 165;
-    surface_pset(screen, x, y2 - 1, 4);
-    surface_vline(screen, x, y1, y2, 2);
+    pset(screen, x, y2 - 1, 4);
+    draw_vline(screen, x, y1, y2, 2);
 
-    surface_vline(screen, -17, 10, 20, 3);
-    surface_vline(screen, 400, 100, 300, 5);
+    draw_vline(screen, -17, 10, 20, 3);
+    draw_vline(screen, 400, 100, 300, 5);
 
     getch();
 }
@@ -114,70 +115,70 @@ void test_line(void) {
     surface_clear(screen, 0);
 
     x1 = 10; y1 = 10; x2 = 20; y2 = 20;
-    surface_pset(screen, x1 - 1, y1, 4);
-    surface_pset(screen, x1, y1 - 1, 4);
-    surface_pset(screen, x2 + 1, y2, 4);
-    surface_pset(screen, x2, y2 + 1, 4);
-    surface_line(screen, x1, y1, x2, y2, 1);
+    pset(screen, x1 - 1, y1, 4);
+    pset(screen, x1, y1 - 1, 4);
+    pset(screen, x2 + 1, y2, 4);
+    pset(screen, x2, y2 + 1, 4);
+    draw_line(screen, x1, y1, x2, y2, 1);
 
     x1 = 10; y1 = 100; x2 = 20; y2 = 150;
-    surface_pset(screen, x1 - 1, y1, 4);
-    surface_pset(screen, x1, y1 - 1, 4);
-    surface_pset(screen, x2 + 1, y2, 4);
-    surface_pset(screen, x2, y2 + 1, 4);
-    surface_line(screen, x1, y1, x2, y2, 2);
+    pset(screen, x1 - 1, y1, 4);
+    pset(screen, x1, y1 - 1, 4);
+    pset(screen, x2 + 1, y2, 4);
+    pset(screen, x2, y2 + 1, 4);
+    draw_line(screen, x1, y1, x2, y2, 2);
 
     x1 = 60; y1 = 150; x2 = 50; y2 = 100;
-    surface_pset(screen, x1 + 1, y1, 4);
-    surface_pset(screen, x1, y1 + 1, 4);
-    surface_pset(screen, x2 - 1, y2, 4);
-    surface_pset(screen, x2, y2 - 1, 4);
-    surface_line(screen, x1, y1, x2, y2, 3);
+    pset(screen, x1 + 1, y1, 4);
+    pset(screen, x1, y1 + 1, 4);
+    pset(screen, x2 - 1, y2, 4);
+    pset(screen, x2, y2 - 1, 4);
+    draw_line(screen, x1, y1, x2, y2, 3);
 
     x1 = 50; y1 = 10; x2 = 100; y2 = 10;
-    surface_pset(screen, x1 - 1, y1, 4);
-    surface_pset(screen, x2 + 1, y1, 4);
-    surface_line(screen, x1, y1, x2, y2, 5);
+    pset(screen, x1 - 1, y1, 4);
+    pset(screen, x2 + 1, y1, 4);
+    draw_line(screen, x1, y1, x2, y2, 5);
 
     x1 = 100; y1 = 50; x2 = 20; y2 = 50;
-    surface_pset(screen, x1 + 1, y1, 4);
-    surface_pset(screen, x2 - 1, y1, 4);
-    surface_line(screen, x1, y1, x2, y2, 6);
+    pset(screen, x1 + 1, y1, 4);
+    pset(screen, x2 - 1, y1, 4);
+    draw_line(screen, x1, y1, x2, y2, 6);
 
     x1 = 290; y1 = 10; x2 = 290; y2 = 100;
-    surface_pset(screen, x1, y1 - 1, 4);
-    surface_pset(screen, x2, y2 + 1, 4);
-    surface_line(screen, x1, y1, x2, y2, 7);
+    pset(screen, x1, y1 - 1, 4);
+    pset(screen, x2, y2 + 1, 4);
+    draw_line(screen, x1, y1, x2, y2, 7);
 
     x1 = 310; y1 = 100; x2 = 310; y2 = 10;
-    surface_pset(screen, x1, y1 + 1, 4);
-    surface_pset(screen, x2, y2 - 1, 4);
-    surface_line(screen, x1, y1, x2, y2, 8);
+    pset(screen, x1, y1 + 1, 4);
+    pset(screen, x2, y2 - 1, 4);
+    draw_line(screen, x1, y1, x2, y2, 8);
 
 
     x1 = 30; y1 = 10; x2 = 40; y2 = 20;
-    surface_pset(screen, x1 - 1, y1, 4);
-    surface_pset(screen, x1, y1 - 1, 4);
-    surface_pset(screen, x2 + 1, y2, 4);
-    surface_pset(screen, x2, y2 + 1, 4);
-    surface_line_f(screen, x1, y1, x2, y2, 1);
+    pset(screen, x1 - 1, y1, 4);
+    pset(screen, x1, y1 - 1, 4);
+    pset(screen, x2 + 1, y2, 4);
+    pset(screen, x2, y2 + 1, 4);
+    draw_line_f(screen, x1, y1, x2, y2, 1);
 
     x1 = 30; y1 = 100; x2 = 40; y2 = 150;
-    surface_pset(screen, x1 - 1, y1, 4);
-    surface_pset(screen, x1, y1 - 1, 4);
-    surface_pset(screen, x2 + 1, y2, 4);
-    surface_pset(screen, x2, y2 + 1, 4);
-    surface_line_f(screen, x1, y1, x2, y2, 2);
+    pset(screen, x1 - 1, y1, 4);
+    pset(screen, x1, y1 - 1, 4);
+    pset(screen, x2 + 1, y2, 4);
+    pset(screen, x2, y2 + 1, 4);
+    draw_line_f(screen, x1, y1, x2, y2, 2);
 
     x1 = 50; y1 = 20; x2 = 100; y2 = 20;
-    surface_pset(screen, x1 - 1, y1, 4);
-    surface_pset(screen, x2 + 1, y1, 4);
-    surface_line_f(screen, x1, y1, x2, y2, 5);
+    pset(screen, x1 - 1, y1, 4);
+    pset(screen, x2 + 1, y1, 4);
+    draw_line_f(screen, x1, y1, x2, y2, 5);
 
     x1 = 300; y1 = 10; x2 = 300; y2 = 100;
-    surface_pset(screen, x1, y1 - 1, 4);
-    surface_pset(screen, x2, y2 + 1, 4);
-    surface_line_f(screen, x1, y1, x2, y2, 7);
+    pset(screen, x1, y1 - 1, 4);
+    pset(screen, x2, y2 + 1, 4);
+    draw_line_f(screen, x1, y1, x2, y2, 7);
 
     getch();
 }
@@ -193,14 +194,14 @@ void test_line_clipping(void) {
 
     surface_clear(screen, 0);
 
-    surface_line(screen, 10, -30, 100, -30, 1);
-    surface_line(screen, 70, 250, 170, 250, 2);
-    surface_line(screen, -100, 120, -100, 199, 3);
-    surface_line(screen, 320, 99, 320, 199, 5);
+    draw_line(screen, 10, -30, 100, -30, 1);
+    draw_line(screen, 70, 250, 170, 250, 2);
+    draw_line(screen, -100, 120, -100, 199, 3);
+    draw_line(screen, 320, 99, 320, 199, 5);
 
     for (angle = 0, color = 32; angle <= 360; angle += 10, ++color) {
         point_on_circle(400, DEG_TO_RAD(angle), &x, &y);
-        surface_line(screen, 160, 100, (int)x + 160, (int)y + 100, color);
+        draw_line(screen, 160, 100, (int)x + 160, (int)y + 100, color);
     }
 
     getch();

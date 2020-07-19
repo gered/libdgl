@@ -4,11 +4,11 @@
 #define SYS_CLOCKS_PER_SEC (1000.0f / 55.0f)
 
 
-int sys_clock() {
-    return *((int*)0x046c);
+uint32 sys_clock() {
+    return *((uint32*)0x046c);
 }
 
-float clock_ticks_to_seconds(int clocks) {
+float clock_ticks_to_seconds(uint32 clocks) {
     return clocks / (float)SYS_CLOCKS_PER_SEC;
 }
 

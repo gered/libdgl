@@ -1,10 +1,14 @@
-#ifndef DGL_DGLFIXP_H_INCLUDED
-#define DGL_DGLFIXP_H_INCLUDED
+#ifndef LIBDGL_DGLFIXP_H
+#define LIBDGL_DGLFIXP_H
 
 #include "dglcmn.h"
 #include <math.h>
 
-typedef int fixed;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef int32 fixed;
 
 #define FP_INT_SHIFT   16
 #define FP_FLOAT_SHIFT 65536.0f
@@ -14,6 +18,7 @@ static fixed fix_cos(fixed x);
 static fixed fix_tan(fixed x);
 
 fixed fix_sqrt(fixed x);
+fixed fix_atan2(fixed y, fixed x);
 
 fixed fix_mul(fixed a, fixed b);
 #pragma aux fix_mul =               \
@@ -34,7 +39,7 @@ fixed fix_div(fixed a, fixed b);
 #define FTOFIX(f)   ((fixed)((f) * FP_FLOAT_SHIFT))
 #define ITOFIX(i)   ((fixed)((i) << FP_INT_SHIFT))
 #define FIXTOF(x)   ((float)((x) / FP_FLOAT_SHIFT))
-#define FIXTOI(x)   ((int)(((x) + 0x8000) >> FP_INT_SHIFT))
+#define FIXTOI(x)   ((int32)(((x) + 0x8000) >> FP_INT_SHIFT))
 
 #define FP_1        ITOFIX(1)
 #define FP_2        ITOFIX(2)
@@ -84,6 +89,10 @@ static fixed fix_cos(fixed x) {
 static fixed fix_tan(fixed x) {
     return FTOFIX(tan(FIXTOF(x)));
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

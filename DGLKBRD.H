@@ -1,10 +1,14 @@
-#ifndef DGL_DGLKYBRD_H_INCLUDED
-#define DGL_DGLKYBRD_H_INCLUDED
+#ifndef LIBDGL_DGLKYBRD_H
+#define LIBDGL_DGLKYBRD_H
 
 #include "dglcmn.h"
 #include "dglkeys.h"
 
-typedef byte KEY;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef uint8 KEY;
 
 #define KEYBRD_FLAGS_SCROLLOCK 0x10
 #define KEYBRD_FLAGS_NUMLOCK   0x20
@@ -15,43 +19,23 @@ typedef byte KEY;
 #define KEYBRD_MOD_NUMLOCK     0x4
 #define KEYBRD_MOD_CAPSLOCK    0x8
 
-/*
- * Current state of the keyboard.
- */
-extern volatile ubyte keys[128];
+extern volatile uint8 keys[128];
 
-extern volatile uword key_flags;
-extern volatile uword key_mod;
+extern volatile uint16 key_flags;
+extern volatile uint16 key_mod;
 
-/*
- * Installs a custom keyboard interrupt handler.
- * @return TRUE on success
- */
-boolean keyboard_init(void);
+bool keyboard_init(void);
+bool keyboard_shutdown(void);
+bool keyboard_is_initialized(void);
 
-/*
- * Removes a previously installed keyboard interrupt handler.
- * @return TRUE on success
- */
-boolean keyboard_shutdown(void);
-
-/*
- * @return TRUE if the custom keyboard interrupt handler is installed.
- */
-boolean keyboard_is_initialized(void);
-
-/*
- * Waits indefinitely until any key is pressed.
- * @return The key that was pressed.
- */
 KEY keyboard_read_key(void);
-
-/*
- * Waits indefinitely until the specified key is pressed.
- */
 void keyboard_wait_for_key(KEY key);
 
-char key_to_char(KEY key, uword modifiers);
+char key_to_char(KEY key, uint16 modifiers);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

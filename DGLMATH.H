@@ -1,9 +1,13 @@
-#ifndef DGL_DGLMATH_H_INCLUDED
-#define DGL_DGLMATH_H_INCLUDED
+#ifndef LIBDGL_DGLMATH_H
+#define LIBDGL_DGLMATH_H
 
 #include "dglcmn.h"
 #include "dglvec2.h"
 #include <math.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define TOLERANCE                  0.00001f
 
@@ -34,18 +38,21 @@ float angle_between_f(float x1, float y1, float x2, float y2);
 int next_power_of_2(int n);
 void point_on_circle(float radius, float radians, float *x, float *y);
 
-static VECTOR2F direction_from_angle(float radians);
+static VEC2 direction_from_angle(float radians);
 static float round(float value);
 static float symmetrical_round(float value);
-static boolean close_enough(float a, float b, float tolerance);
-static boolean power_of_2(int n);
+static bool close_enough(float a, float b, float tolerance);
+static bool power_of_2(int n);
 static float smooth_step(float low, float high, float t);
 
 // --------------------------------------------------------------------------
 
-static VECTOR2F direction_from_angle(float radians) {
-    VECTOR2F direction;
-    point_on_circle(1.0f, radians, &direction.x, &direction.y);
+static VEC2 direction_from_angle(float radians) {
+    VEC2 direction;
+    float x, y;
+    point_on_circle(1.0f, radians, &x, &y);
+    direction.x = FTOFIX(x);
+    direction.y = FTOFIX(y);
     return direction;
 }
 
@@ -60,13 +67,13 @@ static float symmetrical_round(float value) {
         return ceil(value - 0.5f);
 }
 
-static boolean close_enough(float a, float b, float tolerance) {
+static bool close_enough(float a, float b, float tolerance) {
     //return fabs((a - b) / ((b == 0.0f) ? 1.0f : b)) < tolerance;
     // TODO: this is not the best way
     return fabs(a - b) <= tolerance;
 }
 
-static boolean power_of_2(int n) {
+static bool power_of_2(int n) {
     return (n != 0) && !(n & (n - 1));
 }
 
@@ -74,5 +81,9 @@ static float smooth_step(float low, float high, float t) {
     float n = CLAMP(t, 0.0f, 1.0f);
     return LERP(low, high, (n * n) * (3.0f - (2.0f * n)));
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

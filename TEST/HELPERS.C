@@ -1,5 +1,4 @@
 #include "helpers.h"
-#include "dgl.h"
 #include <conio.h>
 #include <dos.h>
 #include <stdio.h>

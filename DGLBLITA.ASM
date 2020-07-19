@@ -7,23 +7,23 @@ codeseg
 
 locals
 
-public direct_blit_4_
-public direct_blit_4r_
-public direct_blit_r_
-public direct_blit_sprite_4_
-public direct_blit_sprite_4r_
-public direct_blit_sprite_r_
-public direct_blit_sprite_8_
-public direct_blit_sprite_8r_
+public lowlevel_blit_4_
+public lowlevel_blit_4r_
+public lowlevel_blit_r_
+public lowlevel_blit_sprite_4_
+public lowlevel_blit_sprite_4r_
+public lowlevel_blit_sprite_r_
+public lowlevel_blit_sprite_8_
+public lowlevel_blit_sprite_8r_
 
-; direct_blit_4_
+; lowlevel_blit_4_
 ;    eax    = width4
 ;    edx    = lines
 ;    ebx    = dest
 ;    ecx    = src
 ;    ebp+8  = dest_y_inc
 ;    ebp+12 = src_y_inc
-proc direct_blit_4_ near
+proc lowlevel_blit_4_ near
 arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     push ebp
@@ -62,7 +62,7 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     endp
 
-; direct_blit_4r_
+; lowlevel_blit_4r_
 ;    eax    = width4
 ;    edx    = lines
 ;    ebx    = remainder
@@ -70,7 +70,7 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
 ;    ebp+8  = src
 ;    ebp+12 = dest_y_inc
 ;    ebp+16 = src_y_inc
-proc direct_blit_4r_ near
+proc lowlevel_blit_4r_ near
 arg @@src:dword, @@dest_y_inc:dword, @@src_y_inc:dword
 
     push ebp
@@ -107,14 +107,14 @@ arg @@src:dword, @@dest_y_inc:dword, @@src_y_inc:dword
 
     endp
 
-; direct_blit_r_
+; lowlevel_blit_r_
 ;    eax    = width
 ;    edx    = lines
 ;    ebx    = dest
 ;    ecx    = src
 ;    ebp+8  = dest_y_inc
 ;    ebp+12 = src_y_inc
-proc direct_blit_r_ near
+proc lowlevel_blit_r_ near
 arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     push ebp
@@ -148,14 +148,14 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     endp
 
-; direct_blit_sprite_4_
+; lowlevel_blit_sprite_4_
 ;    eax    = width4
 ;    edx    = lines
 ;    ebx    = dest
 ;    ecx    = src
 ;    ebp+8  = dest_y_inc
 ;    ebp+12 = src_y_inc
-proc direct_blit_sprite_4_ near
+proc lowlevel_blit_sprite_4_ near
 arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     push ebp
@@ -214,7 +214,7 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     endp
 
-; direct_blit_sprite_4r_
+; lowlevel_blit_sprite_4r_
 ;    eax    = width4
 ;    edx    = lines
 ;    ebx    = dest
@@ -222,7 +222,7 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
 ;    ebp+8  = remainder
 ;    ebp+12 = dest_y_inc
 ;    ebp+16 = src_y_inc
-proc direct_blit_sprite_4r_ near
+proc lowlevel_blit_sprite_4r_ near
 arg @@remainder:dword, @@dest_y_inc:dword, @@src_y_inc:dword
 
     push ebp
@@ -295,14 +295,14 @@ arg @@remainder:dword, @@dest_y_inc:dword, @@src_y_inc:dword
 
     endp
 
-; direct_blit_sprite_r_
+; lowlevel_blit_sprite_r_
 ;    eax    = width
 ;    edx    = lines
 ;    ebx    = dest
 ;    ecx    = src
 ;    ebp+8  = dest_y_inc
 ;    ebp+12 = src_y_inc
-proc direct_blit_sprite_r_ near
+proc lowlevel_blit_sprite_r_ near
 arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     push ebp
@@ -347,14 +347,14 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     endp
 
-; direct_blit_sprite_8_
+; lowlevel_blit_sprite_8_
 ;    eax    = width8
 ;    edx    = lines
 ;    ebx    = dest
 ;    ecx    = src
 ;    ebp+8  = dest_y_inc
 ;    ebp+12 = src_y_inc
-proc direct_blit_sprite_8_ near
+proc lowlevel_blit_sprite_8_ near
 arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     push ebp
@@ -429,7 +429,7 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
 
     endp
 
-; direct_blit_sprite_8r_
+; lowlevel_blit_sprite_8r_
 ;    eax    = width8
 ;    edx    = lines
 ;    ebx    = dest
@@ -437,7 +437,7 @@ arg @@dest_y_inc:dword, @@src_y_inc:dword
 ;    ebp+8  = remainder
 ;    ebp+12 = dest_y_inc
 ;    ebp+16 = src_y_inc
-proc direct_blit_sprite_8r_ near
+proc lowlevel_blit_sprite_8r_ near
 arg @@remainder:dword, @@dest_y_inc:dword, @@src_y_inc:dword
 
     push ebp

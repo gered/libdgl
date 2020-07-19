@@ -1,10 +1,12 @@
 #include "events.h"
-#include "dgl.h"
+#include "dglkbrd.h"
+#include "dglmouse.h"
+#include "dglevent.h"
 #include <stdio.h>
 #include "helpers.h"
 
 void test_events(void) {
-    boolean result;
+    bool result;
     INPUTEVENT *event;
     char ch;
 
@@ -12,15 +14,15 @@ void test_events(void) {
     delay(500);
 
     result = keyboard_init();
-    ASSERT(result == TRUE);
+    ASSERT(result == true);
     result = mouse_init();
-    ASSERT(result == TRUE);
+    ASSERT(result == true);
 
-    ASSERT(events_is_initialized() == FALSE);
+    ASSERT(events_is_initialized() == false);
 
     result = events_init();
-    ASSERT(result == TRUE);
-    ASSERT(events_is_initialized() == TRUE);
+    ASSERT(result == true);
+    ASSERT(events_is_initialized() == true);
 
     printf("Displaying events:\n\n");
 
@@ -63,13 +65,13 @@ void test_events(void) {
     }
 
     result = events_shutdown();
-    ASSERT(result == TRUE);
-    ASSERT(events_is_initialized() == FALSE);
+    ASSERT(result == true);
+    ASSERT(events_is_initialized() == false);
 
     result = mouse_shutdown();
-    ASSERT(result == TRUE);
+    ASSERT(result == true);
     result = keyboard_shutdown();
-    ASSERT(result == TRUE);
+    ASSERT(result == true);
 
     printf("\nPress a key to continue...\n");
 

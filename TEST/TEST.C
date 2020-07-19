@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include "dgl.h"
+#include "dglgfx.h"
 #include "helpers.h"
 
 #include "blit.h"
@@ -30,7 +31,7 @@ int main(void) {
 
     ASSERT(screen == NULL);
 
-    if (!video_init()) {
+    if (!gfx_init()) {
         printf("Error initializing video: %s\n", dgl_last_error_message());
         return 1;
     }
@@ -46,8 +47,8 @@ int main(void) {
     test_mouse();
     test_events();
     test_fixed();
-    test_vector2i();
-    test_vector2f();
+    test_vec2i();
+    test_vec2();
     test_surface_clear();
     test_surface_copy();
     test_pixels_1();

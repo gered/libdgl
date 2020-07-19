@@ -2,7 +2,7 @@
 #include "dglkbrd.h"
 #include "dglmouse.h"
 #include "dglgfx.h"
-#include "dglutil.h"
+#include "dglevent.h"
 #include <stdlib.h>
 
 static DGL_ERROR _last_error = DGL_NONE;
@@ -60,14 +60,14 @@ void dgl_set_error(DGL_ERROR error) {
     _last_error = error;
 }
 
-void _dgl_atexit(void) {
+void dgl_init(void) {
+    atexit(dgl_close);
+}
+
+void dgl_close(void) {
     events_shutdown();
     mouse_shutdown();
     keyboard_shutdown();
-    video_shutdown();
-}
-
-void dgl_init(void) {
-    atexit(_dgl_atexit);
+    gfx_shutdown();
 }
 

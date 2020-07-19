@@ -1,5 +1,7 @@
 #include "text.h"
-#include "dgl.h"
+#include "dglgfx.h"
+#include "dgldraw.h"
+#include "dglmath.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -14,19 +16,19 @@ void test_text(void) {
     surface_clear(screen, 0);
     memset(string, 0, 255);
 
-    surface_text(screen, 10, 10, 15, "Hello, world!");
-    surface_text_f(screen, 170, 10, 15, "Hello, world!");
+    draw_text(screen, 10, 10, 15, "Hello, world!");
+    draw_text_f(screen, 170, 10, 15, "Hello, world!");
 
-    surface_filled_rect(screen, 8, 28, 114, 40, 7);
-    surface_text(screen, 10, 30, 15, "transparency!");
-    surface_filled_rect_f(screen, 168, 28, 274, 40, 7);
-    surface_text_f(screen, 170, 30, 15, "transparency!");
+    draw_filled_rect(screen, 8, 28, 114, 40, 7);
+    draw_text(screen, 10, 30, 15, "transparency!");
+    draw_filled_rect_f(screen, 168, 28, 274, 40, 7);
+    draw_text_f(screen, 170, 30, 15, "transparency!");
 
-    surface_text(screen, 10, 50, 15, "line 1\nline 2");
-    surface_text_f(screen, 170, 50, 15, "line 1\nline 2");
+    draw_text(screen, 10, 50, 15, "line 1\nline 2");
+    draw_text_f(screen, 170, 50, 15, "line 1\nline 2");
 
-    surface_printf(screen, 10, 70, 15, "printf pi %.5f", PI);
-    surface_printf_f(screen, 170, 70, 15, "printf pi %.5f", PI);
+    draw_printf(screen, 10, 70, 15, "printf pi %.5f", PI);
+    draw_printf_f(screen, 170, 70, 15, "printf pi %.5f", PI);
 
     p = &string[0];
     for (i = 1; i <= 127; ++i, ++p) {
@@ -40,8 +42,8 @@ void test_text(void) {
             *p = (char)i;
     }
 
-    surface_text(screen, 10, 100, 15, string);
-    surface_text_f(screen, 170, 100, 15, string);
+    draw_text(screen, 10, 100, 15, string);
+    draw_text_f(screen, 170, 100, 15, string);
 
     getch();
 }
@@ -59,36 +61,36 @@ void test_text_clipping(void) {
     surface_clear(screen, 0);
 
     x = -32; y = 10;
-    surface_rect(screen, x - 1, y - 1, x + width, y + height, 4);
-    surface_text(screen, x, y, 9, message);
+    draw_rect(screen, x - 1, y - 1, x + width, y + height, 4);
+    draw_text(screen, x, y, 9, message);
 
     x = 80; y = -4;
-    surface_rect(screen, x - 1, y - 1, x + width, y + height, 4);
-    surface_text(screen, x, y, 10, message);
+    draw_rect(screen, x - 1, y - 1, x + width, y + height, 4);
+    draw_text(screen, x, y, 10, message);
 
     x = 288; y = 120;
-    surface_rect(screen, x - 1, y - 1, x + width, y + height, 4);
-    surface_text(screen, x, y, 11, message);
+    draw_rect(screen, x - 1, y - 1, x + width, y + height, 4);
+    draw_text(screen, x, y, 11, message);
 
     x = 200; y = 196;
-    surface_rect(screen, x - 1, y - 1, x + width, y + height, 4);
-    surface_text(screen, x, y, 12, message);
+    draw_rect(screen, x - 1, y - 1, x + width, y + height, 4);
+    draw_text(screen, x, y, 12, message);
 
     x = -232; y = 10;
-    surface_rect(screen, x - 1, y - 1, x + width, y + height, 4);
-    surface_text(screen, x, y, 5, message);
+    draw_rect(screen, x - 1, y - 1, x + width, y + height, 4);
+    draw_text(screen, x, y, 5, message);
 
     x = 80; y = -24;
-    surface_rect(screen, x - 1, y - 1, x + width, y + height, 4);
-    surface_text(screen, x, y, 6, message);
+    draw_rect(screen, x - 1, y - 1, x + width, y + height, 4);
+    draw_text(screen, x, y, 6, message);
 
     x = 360; y = 120;
-    surface_rect(screen, x - 1, y - 1, x + width, y + height, 4);
-    surface_text(screen, x, y, 7, message);
+    draw_rect(screen, x - 1, y - 1, x + width, y + height, 4);
+    draw_text(screen, x, y, 7, message);
 
     x = 200; y = 240;
-    surface_rect(screen, x - 1, y - 1, x + width, y + height, 4);
-    surface_text(screen, x, y, 8, message);
+    draw_rect(screen, x - 1, y - 1, x + width, y + height, 4);
+    draw_text(screen, x, y, 8, message);
 
     getch();
 }

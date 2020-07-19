@@ -1,39 +1,39 @@
 #include "dglevent.h"
-#include "dglerror.h"
+#include "dgl.h"
 #include "dglutil.h"
 #include <string.h>
 
-volatile boolean _events_enabled;
+volatile bool _events_enabled = false;
 
 volatile INPUTEVENT _events_buffer[EVENTS_BUFFER_SIZE];
 volatile int _events_buffer_start = 0;
 volatile int _events_buffer_end = 0;
 
-boolean events_init(void) {
+bool events_init(void) {
     if (_events_enabled) {
         dgl_set_error(DGL_EVENTS_ALREADY_INITIALIZED);
-        return FALSE;
+        return false;
     }
 
     events_clear();
-    _events_enabled = TRUE;
+    _events_enabled = true;
 
-    return TRUE;
+    return true;
 }
 
-boolean events_shutdown(void) {
+bool events_shutdown(void) {
     if (!_events_enabled)
-        return TRUE;  // don't care
+        return true;  // don't care
 
-    _events_enabled = FALSE;
+    _events_enabled = false;
     events_clear();
 
-    return TRUE;
+    return true;
 }
 
-boolean events_poll(INPUTEVENT **event) {
+bool events_poll(volatile INPUTEVENT **event) {
     if (events_is_empty())
-        return FALSE;
+        return false;
 
     int_disable();
 
@@ -45,22 +45,26 @@ boolean events_poll(INPUTEVENT **event) {
 
     int_enable();
 
-    return TRUE;
+    return true;
 }
 
-boolean events_peek(INPUTEVENT **event) {
+bool events_peek(volatile INPUTEVENT **event) {
     if (events_is_empty())
-        return FALSE;
+        return false;
+
+    int_disable();
 
     *event = &_events_buffer[_events_buffer_start];
 
-    return TRUE;
+    int_enable();
+
+    return true;
 }
 
 void events_clear(void) {
     int_disable();
 
-    memset(_events_buffer, 0, sizeof(_events_buffer));
+    memset((void*)_events_buffer, 0, sizeof(_events_buffer));
     _events_buffer_start = 0;
     _events_buffer_end = 0;
 

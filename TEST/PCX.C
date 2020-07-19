@@ -1,13 +1,16 @@
 #include "pcx.h"
 #include "dgl.h"
+#include "dglgfx.h"
+#include "dglblit.h"
+#include "dglpcx.h"
 #include <stdio.h>
 #include "helpers.h"
 
 void test_pcx(void) {
     SURFACE *pcx;
     DGL_ERROR err;
-    byte pcx_palette[768];
-    byte original_palette[768];
+    uint8 pcx_palette[768];
+    uint8 original_palette[768];
 
     surface_clear(screen, 0);
     pal_get(original_palette);
@@ -20,7 +23,7 @@ void test_pcx(void) {
     pcx = pcx_load("test.pcx", NULL);
     ASSERT(pcx != NULL);
 
-    surface_blit(pcx, screen, 0, 0);
+    blit(pcx, screen, 0, 0);
     getch();
 
     surface_clear(screen, 0);
@@ -29,7 +32,7 @@ void test_pcx(void) {
     ASSERT(pcx != NULL);
 
     pal_set(pcx_palette);
-    surface_blit(pcx, screen, 0, 0);
+    blit(pcx, screen, 0, 0);
 
     getch();
     pal_set(original_palette);

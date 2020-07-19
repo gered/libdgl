@@ -1,5 +1,5 @@
 #include "surface.h"
-#include "dgl.h"
+#include "dglgfx.h"
 #include <stdio.h>
 
 extern SURFACE *backbuffer;

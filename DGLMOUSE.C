@@ -1,11 +1,11 @@
 #include "dglmouse.h"
+#include "dgl.h"
 #include "dglevent.h"
-#include "dglerror.h"
 #include <string.h>
 #include <dos.h>
 
-static boolean _installed = FALSE;
-static boolean _has_mouse = FALSE;
+static bool _installed = false;
+static bool _has_mouse = false;
 
 static INPUTEVENT *mouse_event;
 
@@ -25,7 +25,7 @@ static void reset_mouse_state(void) {
     mouse_prev_buttons = 0;
 }
 
-static boolean init_mouse_driver(void) {
+static bool init_mouse_driver(void) {
     union REGS regs;
 
     memset(&regs, 0, sizeof(regs));
@@ -112,21 +112,21 @@ void __loadds far mouse_int_handler(int eax, int ebx, int ecx, int edx) {
 }
 #pragma on (check_stack)
 
-boolean mouse_init(void) {
+bool mouse_init(void) {
     union REGS regs;
     struct SREGS sregs;
 
     if (_installed) {
         dgl_set_error(DGL_MOUSE_ALREADY_INITIALIZED);
-        return FALSE;
+        return false;
     }
 
     reset_mouse_state();
 
     _has_mouse = init_mouse_driver();
     if (!_has_mouse) {
-        _installed = TRUE;
-        return TRUE;
+        _installed = true;
+        return true;
     }
 
     update_mouse_state();
@@ -139,19 +139,19 @@ boolean mouse_init(void) {
     sregs.es = FP_SEG(mouse_int_handler);
     int386x(0x33, &regs, &regs, &sregs);
 
-    _installed = TRUE;
-    return TRUE;
+    _installed = true;
+    return true;
 }
 
-boolean mouse_shutdown(void) {
+bool mouse_shutdown(void) {
     union REGS regs;
 
     if (!_installed)
-        return TRUE;   // don't care
+        return true;   // don't care
 
     if (!_has_mouse) {
-        _installed = FALSE;
-        return TRUE;
+        _installed = false;
+        return true;
     }
 
     memset(&regs, 0, sizeof(regs));
@@ -162,15 +162,15 @@ boolean mouse_shutdown(void) {
     reset_mouse_state();
     init_mouse_driver();
 
-    _installed = FALSE;
-    return TRUE;
+    _installed = false;
+    return true;
 }
 
-boolean mouse_is_initialized(void) {
+bool mouse_is_initialized(void) {
     return _installed;
 }
 
-boolean mouse_is_present(void) {
+bool mouse_is_present(void) {
     return _has_mouse;
 }
 

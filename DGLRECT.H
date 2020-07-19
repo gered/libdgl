@@ -1,5 +1,9 @@
-#ifndef DGL_DGLRECT_H_INCLUDED
-#define DGL_DGLRECT_H_INCLUDED
+#ifndef LIBDGL_DGLRECT_H
+#define LIBDGL_DGLRECT_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
     int x;
@@ -36,6 +40,10 @@ static int rect_bottom(const RECT *r) {
     else
         return r->y;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

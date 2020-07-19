@@ -1,5 +1,5 @@
 #include "kbrd.h"
-#include "dgl.h"
+#include "dglkbrd.h"
 #include <dos.h>
 #include <stdio.h>
 #include "helpers.h"
@@ -19,16 +19,16 @@ void display_key_states(void) {
 }
 
 void test_keyboard(void) {
-    boolean result;
+    bool result;
     KEY k;
 
     clrscr(0);
 
-    ASSERT(keyboard_is_initialized() == FALSE);
+    ASSERT(keyboard_is_initialized() == false);
 
     result = keyboard_init();
-    ASSERT(result == TRUE);
-    ASSERT(keyboard_is_initialized() == TRUE);
+    ASSERT(result == true);
+    ASSERT(keyboard_is_initialized() == true);
 
     printf("Keyboard state\n");
     display_key_states();
@@ -52,8 +52,8 @@ void test_keyboard(void) {
     keyboard_wait_for_key(k);
 
     result = keyboard_shutdown();
-    ASSERT(result == TRUE);
-    ASSERT(keyboard_is_initialized() == FALSE);
+    ASSERT(result == true);
+    ASSERT(keyboard_is_initialized() == false);
 
     gotoxy(0, 23);
     printf("Press a key to continue...\n");

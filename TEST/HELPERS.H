@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "dgl.h"
+#include "dglmath.h"
 
 #define F_EQU(a, b) (close_enough((a), (b), TOLERANCE))
 #define FFIX_EQU(a, b) (close_enough((a), (b), 0.05f))  // wow !

@@ -1,38 +1,37 @@
+#include "dgl.h"
 #include "dglpcx.h"
 #include "dglgfx.h"
 #include "dglpal.h"
-#include "dgldraw.h"
-#include "dglerror.h"
 #include <stdio.h>
 #include <string.h>
 
 typedef struct {
-    byte manufacturer;
-    byte version;
-    byte encoding;
-    byte bpp;
-    word x;
-    word y;
-    word width;
-    word height;
-    word horizontal_dpi;
-    word vertical_dpi;
-    byte ega_palette[48];
-    byte reserved;
-    byte num_color_planes;
-    word bytes_per_line;
-    word palette_type;
-    word horizontal_size;
-    word vertical_size;
-    byte padding[54];
+    uint8  manufacturer;
+    uint8  version;
+    uint8  encoding;
+    uint8  bpp;
+    uint16 x;
+    uint16 y;
+    uint16 width;
+    uint16 height;
+    uint16 horizontal_dpi;
+    uint16 vertical_dpi;
+    uint8  ega_palette[48];
+    uint8  reserved;
+    uint8  num_color_planes;
+    uint16 bytes_per_line;
+    uint16 palette_type;
+    uint16 horizontal_size;
+    uint16 vertical_size;
+    uint8  padding[54];
 } PCX_HEADER;
 
-SURFACE* pcx_load(const char *filename, byte *pcx_palette) {
+SURFACE* pcx_load(const char *filename, uint8 *pcx_palette) {
     FILE *fp;
     PCX_HEADER header;
     int i, n, count, x, y;
     SURFACE *pcx;
-    ubyte data;
+    uint8 data;
 
     fp = fopen(filename, "rb");
     if (!fp) {
@@ -58,32 +57,32 @@ SURFACE* pcx_load(const char *filename, byte *pcx_palette) {
 
     pcx = surface_create(header.width + 1, header.height + 1);
 
-	i = 0;
+    i = 0;
     for (y = 0; y < (header.height + 1); ++y) {
-		// write pixels out per-scanline (technically this is what the pcx
-		// standard specifies, though a lot of pcx loaders don't do this).
-	    x = 0;
-		while (x < header.bytes_per_line) {
+        // write pixels out per-scanline (technically this is what the pcx
+        // standard specifies, though a lot of pcx loaders don't do this).
+        x = 0;
+        while (x < header.bytes_per_line) {
             // read pixel (or RLE count...)
             data = fgetc(fp);
-			if ((data & 0xc0) == 0xc0) {
-			   // was an RLE count, pixel is next byte
-			   count = data & 0x3f;
-			   data = fgetc(fp);
-			} else {
-			  count = 1;
-			}
+            if ((data & 0xc0) == 0xc0) {
+                // was an RLE count, pixel is next byte
+                count = data & 0x3f;
+                data = fgetc(fp);
+            } else {
+                count = 1;
+            }
 
-			// store this pixel colour the specified number of times
-			while (count--) {
+            // store this pixel colour the specified number of times
+            while (count--) {
                 if (x < pcx->width) {
-				   pcx->pixels[i] = data;
-				}
-				++i;
-				++x;
-			}
-		}
-	}
+                    pcx->pixels[i] = data;
+                }
+                ++i;
+                ++x;
+            }
+        }
+    }
 
     // read palette (only if needed)
     if (pcx_palette) {
@@ -107,34 +106,34 @@ pcx_load_error:
     return NULL;
 }
 
-static boolean write_pcx_data(FILE *fp, int run_count, byte pixel) {
+static bool write_pcx_data(FILE *fp, int run_count, uint8 pixel) {
     int n;
 
     if ((run_count > 1) || ((pixel & 0xc0) == 0xc0)) {
         n = fputc(0xc0 | run_count, fp);
         if (n == -1)
-            return FALSE;
+            return false;
     }
     n = fputc(pixel, fp);
     if (n == -1)
-        return FALSE;
+        return false;
 
-    return TRUE;
+    return true;
 }
 
-boolean pcx_save(const char *filename, const SURFACE *src, const byte *palette) {
+bool pcx_save(const char *filename, const SURFACE *src, const uint8 *palette) {
     FILE *fp;
     int i, n, x, y;
     int run_count;
-    byte pixel, run_pixel;
-    byte r, g, b;
-    boolean result;
+    uint8 pixel, run_pixel;
+    uint8 r, g, b;
+    bool result;
     PCX_HEADER header;
 
     fp = fopen(filename, "wb");
     if (!fp) {
         dgl_set_error(DGL_IO_ERROR);
-        return FALSE;
+        return false;
     }
 
     memset(&header, 0, sizeof(PCX_HEADER));
@@ -220,11 +219,11 @@ boolean pcx_save(const char *filename, const SURFACE *src, const byte *palette) 
     }
 
     fclose(fp);
-    return TRUE;
+    return true;
 
 pcx_save_error:
     dgl_set_error(DGL_IO_ERROR);
     fclose(fp);
-    return FALSE;
+    return false;
 }
 
